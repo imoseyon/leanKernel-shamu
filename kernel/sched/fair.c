@@ -4102,6 +4102,8 @@ static unsigned long __read_mostly max_load_balance_interval = HZ/10;
 #define LBF_ALL_PINNED	0x01
 #define LBF_NEED_BREAK	0x02
 #define LBF_SOME_PINNED 0x04
+#define LBF_POWER_BAL	0x08	/* if power balance allowed */
+#define LBF_PERF_BAL	0x10	/* if performance balance allowed */
 
 struct lb_env {
 	struct sched_domain	*sd;
@@ -5269,6 +5271,7 @@ static int load_balance(int this_cpu, struct rq *this_rq,
 		.idle		= idle,
 		.loop_break	= sched_nr_migrate_break,
 		.cpus		= cpus,
+		.flags		= LBF_PERF_BAL,
 	};
 
 	/*
