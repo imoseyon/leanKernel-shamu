@@ -4302,6 +4302,10 @@ struct sd_lb_stats {
 	unsigned int  busiest_group_weight;
 
 	int group_imb; /* Is there imbalance in this sd */
+
+	/* Varibles of power awaring scheduling */
+	unsigned int  sd_util;	/* sum utilization of this domain */
+	struct sched_group *group_leader; /* Group which relieves group_min */
 };
 
 /*
@@ -4317,6 +4321,7 @@ struct sg_lb_stats {
 	unsigned long group_weight;
 	int group_imb; /* Is there an imbalance in the group ? */
 	int group_has_capacity; /* Is there extra capacity in the group? */
+	unsigned int group_util;	/* sum utilization of group */
 };
 
 /**
