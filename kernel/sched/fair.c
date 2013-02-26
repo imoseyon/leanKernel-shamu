@@ -4590,6 +4590,60 @@ static inline void update_sd_lb_power_stats(struct lb_env *env,
 	}
 }
 
+#define PERF_LB_HH_MASK		0xffffffff00000000ULL
+#define PERF_LB_LH_MASK		0xffffffffULL
+
+/**
+ * need_perf_balance - Check if the performance load balance needed
+ * in the sched_domain.
+ *
+ * @env: The load balancing environment.
+ * @sds: Variable containing the statistics of the sched_domain
+ */
+static int need_perf_balance(struct lb_env *env, struct sd_lb_stats *sds)
+{
+	env->sd->perf_lb_record <<= 1;
+
+	if (env->flags & LBF_PERF_BAL) {
+		env->sd->perf_lb_record |= 0x1;
+		return 1;
+	}
+
+	/*
+	 * The situation isn't eligible for performance balance. If this_cpu
+	 * is not eligible or the timing is not suitable for lazy powersaving
+	 * balance too, we will stop both powersaving and performance balance.
+	 */
+	if (env->flags & LBF_POWER_BAL && sds->this == sds->group_leader
+			&& sds->group_leader != sds->group_min) {
+		int interval;
+
+		/* powersaving balance interval set as 8 * max_interval */
+		interval = msecs_to_jiffies(8 * env->sd->max_interval);
+
+		/* do power balancing, if no balance in this interval */
+		if (time_after(jiffies, env->sd->last_balance + interval))
+			env->sd->perf_lb_record = 0;
+
+		/*
+		 * A eligible timing is no performance balance in last 32
+		 * balance and performance balance is no more than 4 times
+		 * in last 64 balance.
+		 */
+		if ((hweight64(env->sd->perf_lb_record & PERF_LB_HH_MASK) <= 4)
+			&& !(env->sd->perf_lb_record & PERF_LB_LH_MASK)) {
+
+			env->imbalance = sds->min_load_per_task;
+			return 0;
+		}
+	}
+
+	/* give up this power balancing, do nothing */
+	env->flags &= ~LBF_POWER_BAL;
+	sds->group_min = NULL;
+	return 0;
+}
+
 /**
  * get_sd_load_idx - Obtain the load index for a given sched domain.
  * @sd: The sched_domain whose load_idx is to be obtained.
@@ -5209,18 +5263,8 @@ find_busiest_group(struct lb_env *env, int *balance)
 	 */
 	update_sd_lb_stats(env, balance, &sds);
 
-	if (!(env->flags & LBF_POWER_BAL) && !(env->flags & LBF_PERF_BAL))
-		return  NULL;
-
-	if (env->flags & LBF_POWER_BAL) {
-		if (sds.this == sds.group_leader &&
-				sds.group_leader != sds.group_min) {
-			env->imbalance = sds.min_load_per_task;
-			return sds.group_min;
-		}
-		env->flags &= ~LBF_POWER_BAL;
-		return NULL;
-	}
+	if (!need_perf_balance(env, &sds))
+		return sds.group_min;
 
 	/*
 	 * this_cpu is not the appropriate cpu to perform load balancing at
