@@ -3592,7 +3592,7 @@ static int get_cpu_for_power_policy(struct sched_domain *sd, int cpu,
 
 	policy = get_sd_sched_balance_policy(sd, cpu, p, sds);
 	if (policy != SCHED_POLICY_PERFORMANCE && sds->group_leader) {
-		if (wakeup)
+		if (wakeup && !(sd->flags & SD_SHARE_CPUPOWER))
 			new_cpu = find_leader_cpu(sds->group_leader,
 							p, cpu, policy);
 		/* for fork balancing and a little busy task */
@@ -4505,8 +4505,9 @@ static unsigned long task_h_load(struct task_struct *p)
 static inline void init_sd_lb_power_stats(struct lb_env *env,
 						struct sd_lb_stats *sds)
 {
-	if (sched_balance_policy == SCHED_POLICY_PERFORMANCE ||
-				env->idle == CPU_NOT_IDLE) {
+	if (sched_balance_policy == SCHED_POLICY_PERFORMANCE
+			|| env->sd->flags & SD_SHARE_CPUPOWER
+			|| env->idle == CPU_NOT_IDLE) {
 		env->flags &= ~LBF_POWER_BAL;
 		env->flags |= LBF_PERF_BAL;
 		return;
