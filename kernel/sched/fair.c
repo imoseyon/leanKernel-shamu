@@ -3443,6 +3443,23 @@ struct sg_lb_stats {
 	unsigned int group_util;	/* sum utilization of group */
 };
 
+static unsigned long scale_rt_util(int cpu);
+
+/*
+ * max_cfs_util - get the possible maximum cfs utilization
+ */
+static unsigned int max_cfs_util(int cpu)
+{
+	struct rq *rq = cpu_rq(cpu);
+	unsigned int rt_util = scale_rt_util(cpu);
+	unsigned int cfs_util;
+
+	/* yield cfs utilization to rt's, if total utilization > 100% */
+	cfs_util = min(rq->util, (unsigned int)(FULL_UTIL - rt_util));
+
+	return cfs_util * rq->cfs.h_nr_running;
+}
+
 /*
  * sched_balance_self: balance the current task (running on cpu) in domains
  * that have the 'flag' flag set. In practice, this is SD_BALANCE_FORK and
