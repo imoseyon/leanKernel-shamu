@@ -3455,6 +3455,10 @@ static unsigned int max_cfs_util(int cpu)
 	unsigned int rt_util = scale_rt_util(cpu);
 	unsigned int cfs_util;
 
+	/* use nr_running as instant utilization for burst cpu */
+	if (cpu_rq(cpu)->avg_idle < sysctl_sched_burst_threshold)
+		return rq->nr_running * FULL_UTIL;
+
 	/* yield cfs utilization to rt's, if total utilization > 100% */
 	cfs_util = min(rq->util, (unsigned int)(FULL_UTIL - rt_util));
 
