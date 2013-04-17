@@ -4540,7 +4540,7 @@ static inline void update_sd_lb_power_stats(struct lb_env *env,
 	if (env->flags & LBF_PERF_BAL)
 		return;
 
-	threshold_util =  sgs->group_weight * FULL_UTIL;
+	threshold_util =  group->sgp->power;
 
 	/*
 	 * If the local group is idle or full loaded
