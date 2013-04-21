@@ -3456,14 +3456,14 @@ static unsigned long scale_rt_util(int cpu);
 /*
  * max_cfs_util - get the possible maximum cfs utilization
  */
-static unsigned int max_cfs_util(int cpu)
+static unsigned int max_cfs_util(int cpu, int wakeup)
 {
 	struct rq *rq = cpu_rq(cpu);
 	unsigned int rt_util = scale_rt_util(cpu);
 	unsigned int cfs_util;
 
-	/* use nr_running as instant utilization for burst cpu */
-	if (cpu_rq(cpu)->avg_idle < sysctl_sched_burst_threshold)
+	/* use nr_running as instant utilization in burst wakeup balance */
+	if (wakeup && cpu_rq(cpu)->avg_idle < sysctl_sched_burst_threshold)
 		return rq->nr_running * FULL_UTIL;
 
 	/* yield cfs utilization to rt's, if total utilization > 100% */
@@ -3476,12 +3476,12 @@ static unsigned int max_cfs_util(int cpu)
  * Try to collect the task running number and capacity of the group.
  */
 static void get_sg_power_stats(struct sched_group *group,
-	struct sched_domain *sd, struct sg_lb_stats *sgs)
+	struct sched_domain *sd, struct sg_lb_stats *sgs, int wakeup)
 {
 	int i;
 
 	for_each_cpu(i, sched_group_cpus(group))
-		sgs->group_util += max_cfs_util(i);
+		sgs->group_util += max_cfs_util(i, wakeup);
 
 	sgs->group_weight = group->group_weight;
 }
@@ -3490,7 +3490,7 @@ static void get_sg_power_stats(struct sched_group *group,
  * Is this domain full of utilization with the task?
  */
 static int is_sd_full(struct sched_domain *sd,
-		struct task_struct *p, struct sd_lb_stats *sds)
+		struct task_struct *p, struct sd_lb_stats *sds, int wakeup)
 {
 	struct sched_group *group;
 	struct sg_lb_stats sgs;
@@ -3510,7 +3510,7 @@ static int is_sd_full(struct sched_domain *sd,
 		long g_delta;
 
 		memset(&sgs, 0, sizeof(sgs));
-		get_sg_power_stats(group, sd, &sgs);
+		get_sg_power_stats(group, sd, &sgs, wakeup);
 
 		g_delta = sgs.group_weight * FULL_UTIL - sgs.group_util;
 
@@ -3533,13 +3533,13 @@ static int is_sd_full(struct sched_domain *sd,
  * Execute power policy if this domain is not full.
  */
 static inline int get_sd_sched_balance_policy(struct sched_domain *sd,
-	int cpu, struct task_struct *p, struct sd_lb_stats *sds)
+	int cpu, struct task_struct *p, struct sd_lb_stats *sds, int wakeup)
 {
 	if (sched_balance_policy == SCHED_POLICY_PERFORMANCE)
 		return SCHED_POLICY_PERFORMANCE;
 
 	memset(sds, 0, sizeof(*sds));
-	if (is_sd_full(sd, p, sds))
+	if (is_sd_full(sd, p, sds, wakeup))
 		return SCHED_POLICY_PERFORMANCE;
 	return sched_balance_policy;
 }
@@ -3550,7 +3550,7 @@ static inline int get_sd_sched_balance_policy(struct sched_domain *sd,
  */
 static int
 find_leader_cpu(struct sched_group *group, struct task_struct *p, int this_cpu,
-		int policy)
+		int policy, int wakeup)
 {
 	int vacancy, min_vacancy = INT_MAX;
 	int leader_cpu = -1;
@@ -3561,7 +3561,7 @@ find_leader_cpu(struct sched_group *group, struct task_struct *p, int this_cpu,
 
 	/* bias toward local cpu */
 	if (cpumask_test_cpu(this_cpu, tsk_cpus_allowed(p)) &&
-			FULL_UTIL - max_cfs_util(this_cpu) - (putil << 2) > 0)
+		FULL_UTIL - max_cfs_util(this_cpu, wakeup) - (putil << 2) > 0)
 		return this_cpu;
 
 	/* Traverse only the allowed CPUs */
@@ -3570,7 +3570,7 @@ find_leader_cpu(struct sched_group *group, struct task_struct *p, int this_cpu,
 			continue;
 
 		/* only light task allowed, putil < 25% */
-		vacancy = FULL_UTIL - max_cfs_util(i) - (putil << 2);
+		vacancy = FULL_UTIL - max_cfs_util(i, wakeup) - (putil << 2);
 
 		if (vacancy > 0 && vacancy < min_vacancy) {
 			min_vacancy = vacancy;
@@ -3590,11 +3590,11 @@ static int get_cpu_for_power_policy(struct sched_domain *sd, int cpu,
 	int policy;
 	int new_cpu = -1;
 
-	policy = get_sd_sched_balance_policy(sd, cpu, p, sds);
+	policy = get_sd_sched_balance_policy(sd, cpu, p, sds, wakeup);
 	if (policy != SCHED_POLICY_PERFORMANCE && sds->group_leader) {
 		if (wakeup && !(sd->flags & SD_SHARE_CPUPOWER))
 			new_cpu = find_leader_cpu(sds->group_leader,
-							p, cpu, policy);
+							p, cpu, policy, wakeup);
 		/* for fork balancing and a little busy task */
 		if (new_cpu == -1)
 			new_cpu = find_idlest_cpu(sds->group_leader, p, cpu);
@@ -4887,7 +4887,7 @@ static inline void update_sg_lb_stats(struct lb_env *env,
 		sgs->sum_weighted_load += weighted_cpuload(i);
 
 		/* add scaled rq utilization */
-		sgs->group_util += max_cfs_util(i);
+		sgs->group_util += max_cfs_util(i, 0);
 
 		if (idle_cpu(i))
 			sgs->idle_cpus++;
