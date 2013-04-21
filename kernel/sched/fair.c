@@ -3482,8 +3482,6 @@ static void get_sg_power_stats(struct sched_group *group,
 
 	for_each_cpu(i, sched_group_cpus(group))
 		sgs->group_util += max_cfs_util(i, wakeup);
-
-	sgs->group_weight = group->group_weight;
 }
 
 /*
@@ -3512,7 +3510,7 @@ static int is_sd_full(struct sched_domain *sd,
 		memset(&sgs, 0, sizeof(sgs));
 		get_sg_power_stats(group, sd, &sgs, wakeup);
 
-		g_delta = sgs.group_weight * FULL_UTIL - sgs.group_util;
+		g_delta = group->sgp->power - sgs.group_util;
 
 		if (g_delta > 0 && g_delta < sd_min_delta) {
 			sd_min_delta = g_delta;
@@ -3520,9 +3518,10 @@ static int is_sd_full(struct sched_domain *sd,
 		}
 
 		sds->sd_util += sgs.group_util;
+		sds->total_pwr += group->sgp->power;
 	} while  (group = group->next, group != sd->groups);
 
-	if (sds->sd_util + putil < sd->span_weight * FULL_UTIL)
+	if (sds->sd_util + min(putil, putil << 2) < sds->total_pwr)
 		return 0;
 
 	/* can not hold one more task in this domain */
