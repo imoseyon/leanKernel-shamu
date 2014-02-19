@@ -3371,6 +3371,9 @@ static int android_bind(struct usb_composite_dev *cdev)
 	/* Save the default handler */
 	dev->setup_complete = cdev->req->complete;
 
+	/* Save the default handler */
+	dev->setup_complete = cdev->req->complete;
+
 	/*
 	 * Start disconnected. Userspace will connect the gadget once
 	 * it is done configuring the functions.
