@@ -41,6 +41,7 @@ static char *descriptions =
 	"16 msm: perf: tracectr: Initialize cnts after hotplug\n"
 	"17 Perf: Reset pmu after hotplug\n"
 	"20 msm: perf: set filter bits for cycle counter on krait\n"
+	"21 Perf: Fix hrtimer operation across hotplug\n"
 ;
 
 static ssize_t desc_read(struct file *fp, char __user *buf,
