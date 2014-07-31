@@ -1796,6 +1796,14 @@ config PERF_EVENTS_USERMODE
 	  If enabled, the access permissions allowing CPU performance
 	  counters to be accessed from user-mode are set.
 
+config PERF_EVENTS_RESET_PMU_DEBUGFS
+	bool "Reset PMU via debugfs node"
+	depends on PERF_EVENTS
+	help
+		Enable the debugfs node that can be used to reset PMUs and all
+		state variables associated with PMUs. If enabled, PMU and internal
+		state variable are cleared.
+
 source "mm/Kconfig"
 
 config ARCH_MEMORY_PROBE
