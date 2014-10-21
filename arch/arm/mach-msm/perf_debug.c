@@ -50,6 +50,7 @@ static char *descriptions =
 	"27 Perf: stop counters when going into hotplug\n"
 	"29 msm: perf: Refine disable/enable in tracecounters\n"
 	"30 Perf: reset pmu enables when starting perf\n"
+	"31 Perf: make debug dir handle exportable\n"
 ;
 
 static ssize_t desc_read(struct file *fp, char __user *buf,
