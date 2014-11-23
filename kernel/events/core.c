@@ -1355,7 +1355,7 @@ static int __perf_remove_from_context(void *info)
 }
 
 #ifdef CONFIG_SMP
-static void perf_retry_remove(struct remove_event *re)
+static void __ref perf_retry_remove(struct remove_event *re)
 {
 	int up_ret;
 	/*
