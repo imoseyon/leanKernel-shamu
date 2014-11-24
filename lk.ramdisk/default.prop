@@ -1,0 +1,18 @@
+#
+# ADDITIONAL_DEFAULT_PROPERTIES
+#
+ro.secure=1
+ro.allow.mock.location=0
+ro.debuggable=0
+ro.zygote=zygote32
+camera.disable_zsl_mode=0
+persist.camera.HAL3.enabled=1
+persist.camera.ois.disable=0
+persist.sys.usb.config=mtp
+ro.qualcomm.perf.cores_online=2
+ro.adb.secure=1
+dalvik.vm.dex2oat-Xms=64m
+dalvik.vm.dex2oat-Xmx=512m
+dalvik.vm.image-dex2oat-Xms=64m
+dalvik.vm.image-dex2oat-Xmx=64m
+ro.dalvik.vm.native.bridge=0
