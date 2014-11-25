@@ -1009,13 +1009,13 @@ void vc_set_vdd(const char *buf)
             pr_info("[imoseyon]: voltage for %lu changed to %d\n",
                 krait0_clk.c.fmax[i]/1000, volt*1000);
             vdd0->vdd_uv[i] = min(max((unsigned int)volt*1000,
-                (unsigned int)500000), (unsigned int)1350000);
+                (unsigned int)500000), (unsigned int)1275000);
             vdd1->vdd_uv[i] = min(max((unsigned int)volt*1000,
-                (unsigned int)500000), (unsigned int)1350000);
+                (unsigned int)500000), (unsigned int)1275000);
             vdd2->vdd_uv[i] = min(max((unsigned int)volt*1000,
-                (unsigned int)500000), (unsigned int)1350000);
+                (unsigned int)500000), (unsigned int)1275000);
             vdd3->vdd_uv[i] = min(max((unsigned int)volt*1000,
-                (unsigned int)500000), (unsigned int)1350000);
+                (unsigned int)500000), (unsigned int)1275000);
             ret = sscanf(buf, "%s", size_cur);
             buf += (strlen(size_cur)+1);
         }
