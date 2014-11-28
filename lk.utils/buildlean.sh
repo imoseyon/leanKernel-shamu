@@ -6,6 +6,7 @@ objdir="/lk2/shamu_obj"
 device="shamu"
 cc="/data/linaro/49/arm-cortex_a15-linux-gnueabihf-linaro/bin/arm-eabi-"
 filename="lk_${device}_lp-v${1}.zip"
+ocuc_branch="lk-lp-ocuc"
 
 compile() {
   cd $sdir
@@ -34,5 +35,7 @@ zipit() {
   cd $sdir
 } 
 
+[[ $1 =~ "ocuc" ]] && git checkout $ocuc_branch arch/arm/boot/dts/qcom/apq8084.dtsi
 compile $1 && ramdisk && zipit $filename
+[[ $1 =~ "ocuc" ]] && git checkout HEAD arch/arm/boot/dts/qcom/apq8084.dtsi
 #compile $1 && ramdisk 
