@@ -2010,11 +2010,14 @@ static int cpufreq_set_policy(struct cpufreq_policy *policy,
 	blocking_notifier_call_chain(&cpufreq_policy_notifier_list,
 			CPUFREQ_NOTIFY, new_policy);
 
-	policy->min = new_policy->min;
 	if (new_policy->cpu) {
 		cpu0_policy = cpufreq_cpu_get(0);
+		policy->min = cpu0_policy->min;
 		policy->max = cpu0_policy->max;
-	} else policy->max = new_policy->max;
+	} else {
+		policy->min = new_policy->min;
+		policy->max = new_policy->max;
+	}
 
 	pr_debug("new min and max freqs are %u - %u kHz\n",
 					policy->min, policy->max);
