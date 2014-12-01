@@ -16,9 +16,9 @@ compile() {
 
 ramdisk() {
   cd $sdir/lk.ramdisk
-  chmod 750 init* charger sbin/adbd
-  chmod 644 default* uevent* res/images/charger/* lpm.rc
-  chmod 755 sbin
+  chmod 750 init* sbin/adbd sbin/healthd
+  chmod 644 default* uevent* res/images/charger/*
+  chmod 755 sbin sbin/lkconfig
   chmod 700 sbin/lk-post-boot.sh
   chmod 755 res res/images res/images/charger
   chmod 640 fstab.shamu
