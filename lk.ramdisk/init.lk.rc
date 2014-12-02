@@ -1,3 +1,6 @@
+on boot
+     chown system system /sys/class/leds/charging/brightness
+
 service lk-post-boot /sbin/lk-post-boot.sh
      class late_start
      user root
