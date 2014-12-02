@@ -13,8 +13,8 @@ chmod 755 /data/data/leankernel
 
 # screen_off_maxfreq
 CFILE="/data/data/leankernel/screen_off_maxfreq"
-SFILE="/sys/devices/system/cpu/cpufreq"
-[ -f $CFILE ] && echo `cat $CFILE` > $SFILE/interactive/screen_off_maxfreq
+SFILE="/sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE
 
 # MMC CRC
 CFILE="/data/data/leankernel/use_spi_crc"
@@ -25,3 +25,13 @@ SFILE="/sys/module/mmc_core/parameters/use_spi_crc"
 CFILE="/data/data/leankernel/cpuboost_enable"
 SFILE="/sys/module/cpu_boost/parameters/cpuboost_enable"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+
+# charging led
+CFILE="/data/data/leankernel/charging_led"
+SFILE="/sys/class/leds/charging"
+[ -f $CFILE ] && echo battery-charging > $SFILE/trigger && echo 4 > $SFILE/brightness 
+
+# rgb control
+CFILE="/data/data/leankernel/kcal"
+SFILE="/sys/devices/platform/kcal_ctrl.0"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE/kcal && echo 1 > $SFILE/kcal_ctrl
