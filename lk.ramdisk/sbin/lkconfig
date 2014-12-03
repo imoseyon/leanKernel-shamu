@@ -83,7 +83,7 @@ case $option in
         echo "Done! (also will persist at boot)"
 	;;
 5)
-        echo -n "Enter three values (red, green, blue) between 0-255 (ie. 245 245 255):"
+        echo -n "Enter three values (red, green, blue) between 0-255 (default is 255 255 255):"
         read value
         echo "$value" > /data/data/leankernel/kcal
 	echo "$value" > /sys/devices/platform/kcal_ctrl.0/kcal
