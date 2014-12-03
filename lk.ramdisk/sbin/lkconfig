@@ -75,7 +75,7 @@ case $option in
 	if [ "$value" == "Y" ]; then 
         	echo battery-charging > /data/data/leankernel/charging_led
 		echo battery-charging > /sys/class/leds/charging/trigger
-		echo 4 > /sys/class/leds/charging/brightness
+		echo 1 > /sys/class/leds/charging/max_brightness
 	else
         	rm -f /data/data/leankernel/charging_led
 		echo none > /sys/class/leds/charging/trigger

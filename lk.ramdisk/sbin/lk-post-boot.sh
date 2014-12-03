@@ -29,7 +29,7 @@ SFILE="/sys/module/cpu_boost/parameters/cpuboost_enable"
 # charging led
 CFILE="/data/data/leankernel/charging_led"
 SFILE="/sys/class/leds/charging"
-[ -f $CFILE ] && echo battery-charging > $SFILE/trigger && echo 4 > $SFILE/brightness 
+[ -f $CFILE ] && echo battery-charging > $SFILE/trigger && echo 1 > $SFILE/max_brightness
 
 # rgb control
 CFILE="/data/data/leankernel/kcal"

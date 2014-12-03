@@ -1,5 +1,6 @@
 on boot
      chown system system /sys/class/leds/charging/brightness
+     chown system system /sys/class/leds/charging/max_brightness
 
 service lk-post-boot /sbin/lk-post-boot.sh
      class late_start
