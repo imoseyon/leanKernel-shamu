@@ -72,7 +72,7 @@ case $option in
 4)
         echo -n "Enter Y to enable, N to disable charging led: "
         read value
-	if [ "$value" == "Y" ]; then 
+	if [ "$value" == "Y" ] || [ "$value" == "y" ]; then 
         	echo battery-charging > /data/data/leankernel/charging_led
 		echo battery-charging > /sys/class/leds/charging/trigger
 		echo 1 > /sys/class/leds/charging/max_brightness
@@ -85,10 +85,12 @@ case $option in
 5)
         echo -n "Enter three values (red, green, blue) between 0-255 (default is 255 255 255):"
         read value
-        echo "$value" > /data/data/leankernel/kcal
-	echo "$value" > /sys/devices/platform/kcal_ctrl.0/kcal
-	echo 1 > /sys/devices/platform/kcal_ctrl.0/kcal_ctrl
-        echo "Done! (also will persist at boot)"
+	if [ -n "$value" ]; then
+		echo "$value" > /data/data/leankernel/kcal
+		echo "$value" > /sys/devices/platform/kcal_ctrl.0/kcal
+		echo 1 > /sys/devices/platform/kcal_ctrl.0/kcal_ctrl
+		echo "Done! (also will persist at boot)"
+	fi
 	;;
 *)
 	exit
