@@ -196,8 +196,10 @@ static void req_cryptd_crypt_read_convert(struct req_dm_crypt_io *io)
 	ablkcipher_request_set_callback(req, CRYPTO_TFM_REQ_MAY_BACKLOG,
 					req_crypt_cipher_complete, &result);
 	init_completion(&result.completion);
+#ifdef CONFIG_CRYPTO_HW
 	qcrypto_cipher_set_flag(req,
 		QCRYPTO_CTX_USE_PIPE_KEY | QCRYPTO_CTX_XTS_DU_SIZE_512B);
+#endif
 	crypto_ablkcipher_clear_flags(tfm, ~0);
 	crypto_ablkcipher_setkey(tfm, NULL, KEY_SIZE_XTS);
 
@@ -322,8 +324,10 @@ static void req_cryptd_crypt_write_convert(struct req_dm_crypt_io *io)
 				req_crypt_cipher_complete, &result);
 
 	init_completion(&result.completion);
+#ifdef CONFIG_CRYPTO_HW
 	qcrypto_cipher_set_flag(req,
 		QCRYPTO_CTX_USE_PIPE_KEY | QCRYPTO_CTX_XTS_DU_SIZE_512B);
+#endif
 	crypto_ablkcipher_clear_flags(tfm, ~0);
 	crypto_ablkcipher_setkey(tfm, NULL, KEY_SIZE_XTS);
 
