@@ -9,7 +9,7 @@ echo
 echo "leanKernel configurator"
 echo "---"
 echo "0) display current settings"
-echo "1) set screen_off_maxfreq"
+echo "1) set interactiveX screen_off_maxfreq"
 echo "2) set mmc crc"
 echo "3) set cpu boost"
 echo "4) set charging led"
@@ -24,7 +24,7 @@ case $option in
 	echo
 	echo "current settings"
 	echo "----------------"
-	echo -n "1) screen off maxfreq: "
+	echo -n "1) interactiveX screen off maxfreq: "
 	value=`cat /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq`
 	[ $value -gt 2600000 ] && echo "Disabled" || echo $value
 	echo -n "2) mmc crc: "
@@ -42,14 +42,15 @@ case $option in
 	echo
 	;;
 1)
-	echo -n "Enter a number between 0 and 4 (0:650mhz,1:883mhz,2:1.2ghz/default,3:1.5ghz,4:disable): "
+	echo -n "Enter a number between 0 and 5 (0:650mhz,1:883mhz,2:1.2ghz,3:1.5ghz,4:2.2ghz/default,5:disable): "
 	read value
 	case $value in
 	  0) FREQ=652800;;
 	  1) FREQ=883200;;
 	  2) FREQ=1267200;;
 	  3) FREQ=1574400;;
-	  4) FREQ=2649600;;
+	  4) FREQ=2265600;;
+	  5) FREQ=2649600;;
 	esac
 	echo $FREQ > /data/data/leankernel/screen_off_maxfreq
 	echo $FREQ > /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq
