@@ -13,7 +13,8 @@ echo "1) set interactiveX screen_off_maxfreq"
 echo "2) set mmc crc"
 echo "3) set cpu boost"
 echo "4) set charging led"
-echo "5) set rgb control"
+echo "5) set rgb control (advanced)"
+echo "6) set rgb control (simple)"
 echo
 echo -n "please enter a number (or press enter to exit): "
 
@@ -92,6 +93,19 @@ case $option in
 		echo 1 > /sys/devices/platform/kcal_ctrl.0/kcal_ctrl
 		echo "Done! (also will persist at boot)"
 	fi
+	;;
+6)
+        echo -n "Enter 1 for reference(6500k), 2 for cool(7400k), 3 for stock(6250k):"
+        read value
+	case $value in
+	  1) RGB="248 246 255";;
+	  2) RGB="237 235 255";;
+	  *) RGB="255 255 255";;
+	esac
+	echo "$RGB" > /data/data/leankernel/kcal
+	echo "$RGB" > /sys/devices/platform/kcal_ctrl.0/kcal
+	echo 1 > /sys/devices/platform/kcal_ctrl.0/kcal_ctrl
+	echo "Done! (also will persist at boot)"
 	;;
 *)
 	exit
