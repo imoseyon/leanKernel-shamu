@@ -16,6 +16,8 @@ echo "4) set charging led"
 echo "5) set rgb control (advanced)"
 echo "6) set rgb control (simple)"
 echo
+echo "9) check top 10 wake locks (ie. wakeup sources)"
+echo
 echo -n "please enter a number (or press enter to exit): "
 
 read option
@@ -106,6 +108,14 @@ case $option in
 	echo "$RGB" > /sys/devices/platform/kcal_ctrl.0/kcal
 	echo 1 > /sys/devices/platform/kcal_ctrl.0/kcal_ctrl
 	echo "Done! (also will persist at boot)"
+	;;
+9)
+	echo
+	if [ -a /system/xbin/awk ]; then
+		cat /sys/kernel/debug/wakeup_sources | awk '{ print $2"   "$1 }' | sort -rn | head -10
+	else
+		echo "busybox required!"
+	fi
 	;;
 *)
 	exit
