@@ -50,9 +50,9 @@ extern int g_kcal_b;
 
 int kcal_set_values(int kcal_r, int kcal_g, int kcal_b)
 {
-	g_kcal_r = kcal_r;
-	g_kcal_g = kcal_g;
-	g_kcal_b = kcal_b;
+	g_kcal_r = max(kcal_r, 50);
+	g_kcal_g = max(kcal_g, 50);
+	g_kcal_b = max(kcal_b, 50);
 	return 0;
 }
 
