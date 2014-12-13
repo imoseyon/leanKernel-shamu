@@ -1,5 +1,8 @@
 #!/system/bin/sh
 
+# allow untrusted apps to read from debugfs
+/system/xbin/supolicy --live "allow untrusted_app debugfs file read"
+
 # for lkconfig
 [ ! -d "/data/data/leankernel" ] && mkdir /data/data/leankernel
 chmod 755 /data/data/leankernel

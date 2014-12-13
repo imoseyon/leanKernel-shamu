@@ -498,8 +498,8 @@ service gsiff_daemon /system/vendor/bin/gsiff_daemon
 on property:sys.boot_completed=1
     start qcom-post-boot
 
-on property:ro.debuggable=1
-    start ss_ramdump
+#on property:ro.debuggable=1
+#    start ss_ramdump
 
 on property:ro.data.large_tcp_window_size=true
     # Adjust socket buffer to enlarge TCP receive window for high bandwidth (e.g. DO-RevB)

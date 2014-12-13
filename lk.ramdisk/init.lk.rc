@@ -2,6 +2,15 @@ on boot
      chown system system /sys/class/leds/charging/brightness
      chown system system /sys/class/leds/charging/max_brightness
 
+service supolicy /system/xbin/supolicy --live "allow adbd adbd process setcurrent" \
+	"allow adbd init process dyntransition" \
+ 	"allow isolated_app init unix_stream_socket connectto"	
+     disabled
+     oneshot
+
+on post-fs-data
+     start supolicy
+
 service lk-post-boot /sbin/lk-post-boot.sh
      class late_start
      user root
