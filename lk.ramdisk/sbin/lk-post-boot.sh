@@ -1,5 +1,9 @@
 #!/system/bin/sh
 
+# e/frandom permissions
+chmod 444 /dev/erandom
+chmod 444 /dev/frandom
+
 # allow untrusted apps to read from debugfs
 /system/xbin/supolicy --live "allow untrusted_app debugfs file read"
 
