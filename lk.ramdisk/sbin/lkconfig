@@ -40,7 +40,7 @@ case $option in
 		*"[battery-charging]"*) echo "Enabled" ;;
 		*) echo "Disabled" ;;
 	esac
-	echo -n "5) rgb control (red greed blue): "
+	echo -n "5) rgb control (red green blue): "
 	cat /sys/devices/platform/kcal_ctrl.0/kcal
 	echo
 	;;
