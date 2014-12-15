@@ -1532,6 +1532,9 @@ static void mxt_proc_t93_messages(struct mxt_data *data, u8 *msg)
 		struct device *dev = &data->client->dev;
 		struct input_dev *input_dev = data->input_dev;
 
+#ifdef CONFIG_WAKE_GESTURES
+		set_vibrate(vib_strength);
+#endif
 		input_report_key(input_dev, KEY_POWER, 1);
 		input_report_key(input_dev, KEY_POWER, 0);
 		input_sync(input_dev);
@@ -2440,8 +2443,13 @@ static inline void mxt_restore_default_mode(struct mxt_data *data)
 	data->current_mode = data->default_mode;
 }
 
+#ifdef CONFIG_WAKE_GESTURES
+static const char * const mxt_state_names[] = { "UNKNOWN", "ACTIVE", "SUSPEND",
+	"UNUSED", "STANDBY", "BL", "INIT", "FLASH", "QUERY", "WG", "INVALID" };
+#else
 static const char * const mxt_state_names[] = { "UNKNOWN", "ACTIVE", "SUSPEND",
 	"UNUSED", "STANDBY", "BL", "INIT", "FLASH", "QUERY", "INVALID" };
+#endif
 
 static const char *mxt_state_name(int state)
 {
@@ -4992,7 +5000,7 @@ static int mxt_suspend(struct device *dev)
 		mxt_lock(&data->crit_section_lock);
 
 #ifdef CONFIG_WAKE_GESTURES
-		if (s2w_switch)
+		if (s2w_switch && !in_phone_call)
 			mxt_set_sensor_state(data, STATE_WG);
 		else
 #endif
