@@ -5,7 +5,9 @@ chmod 444 /dev/erandom
 chmod 444 /dev/frandom
 
 # allow untrusted apps to read from debugfs
-/system/xbin/supolicy --live "allow untrusted_app debugfs file read"
+/system/xbin/supolicy --live "allow untrusted_app debugfs file read" \
+	"allow debuggerd gpu_device chr_file read" \
+	"allow shell dalvikcache_data_file file write"
 
 # for lkconfig
 [ ! -d "/data/data/leankernel" ] && mkdir /data/data/leankernel
