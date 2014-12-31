@@ -4,7 +4,7 @@ on boot
 
 service supolicy /system/xbin/supolicy --live "allow adbd adbd process setcurrent" \
 	"allow adbd init process dyntransition" \
- 	"allow isolated_app init unix_stream_socket connectto"	
+ 	"allow { isolated_app shared_relro } init unix_stream_socket connectto"	
      disabled
      oneshot
 
