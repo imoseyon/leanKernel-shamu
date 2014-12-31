@@ -6,9 +6,9 @@ chmod 444 /dev/frandom
 
 # allow untrusted apps to read from debugfs
 /system/xbin/supolicy --live \
-	"allow untrusted_app debugfs file read" \
-	"allow untrusted_app sysfs_lowmemorykiller file read" \
-	"allow debuggerd gpu_device chr_file read" \
+	"allow untrusted_app debugfs file { open read getattr }" \
+	"allow untrusted_app sysfs_lowmemorykiller file { open read }" \
+	"allow debuggerd gpu_device chr_file { open read }" \
 	"allow netd netd capability fsetid" \
 	"allow { system_app shell } dalvikcache_data_file file write"
 
