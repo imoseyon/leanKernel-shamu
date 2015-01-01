@@ -40,7 +40,6 @@
 #include <sound/tlv.h>
 #include "tfa9890-core.h"
 
-
 #define I2C_RETRY_DELAY		5 /* ms */
 #define I2C_RETRIES		5
 #define PLL_SYNC_RETRIES		10
