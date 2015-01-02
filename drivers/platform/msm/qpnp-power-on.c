@@ -1186,7 +1186,7 @@ static int qpnp_pon_config_init(struct qpnp_pon *pon)
 			goto free_input_dev;
 		}
 #ifdef CONFIG_WAKE_GESTURES
-		else if (s2w_switch) {
+		else {
 			 wg_setdev(pon->pon_input);
 			 printk(KERN_INFO "[sweep2wake]: set device %s\n", pon->pon_input->name);
 		}
