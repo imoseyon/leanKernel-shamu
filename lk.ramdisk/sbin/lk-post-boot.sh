@@ -47,3 +47,14 @@ SFILE="/sys/class/leds/charging"
 CFILE="/data/data/leankernel/kcal"
 SFILE="/sys/devices/platform/kcal_ctrl.0"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE/kcal && echo 1 > $SFILE/kcal_ctrl
+
+# wake gesture control
+CFILE="/data/data/leankernel/tsp"
+SFILE="/sys/bus/i2c/devices/1-004a/tsp"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+CFILE="/data/data/leankernel/doubletap2wake"
+SFILE="/sys/android_touch/doubletap2wake"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+CFILE="/data/data/leankernel/sweep2wake"
+SFILE="/sys/android_touch/sweep2wake"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE

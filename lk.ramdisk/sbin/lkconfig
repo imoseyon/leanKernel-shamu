@@ -10,7 +10,7 @@ echo "leanKernel configurator"
 echo "---"
 echo "0) display current settings"
 echo "1) set interactiveX screen_off_maxfreq"
-echo "2) set mmc crc"
+echo "2) configure wake gesture control"
 echo "3) set cpu boost"
 echo "4) set charging led"
 echo "5) set rgb control (advanced)"
@@ -30,8 +30,11 @@ case $option in
 	echo -n "1) interactiveX screen off maxfreq: "
 	value=`cat /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq`
 	[ $value -gt 2600000 ] && echo "Disabled" || echo $value
-	echo -n "2) mmc crc: "
-	cat /sys/module/mmc_core/parameters/use_spi_crc
+	echo -n "2) wake gestures (stock dt2w - haptic dt2w - s2w): "
+	sdt=`cat /sys/bus/i2c/devices/1-004a/tsp`
+	hdt=`cat /sys/android_touch/doubletap2wake`
+	s2w=`cat /sys/android_touch/sweep2wake`
+	echo "$sdt - $hdt - $s2w"
 	echo -n "3) cpu boost: "
 	cat /sys/module/cpu_boost/parameters/cpuboost_enable
 	echo -n "4) charging led: "
@@ -60,10 +63,50 @@ case $option in
 	echo "Done! (also will persist at boot)"
 	;;
 2)
-	echo -n "Enter Y to enable, N to disable mmc crc: "
+	echo -n "Enter 1 for stock dt2w, 2 for haptic dt2w, 3 for s2w, 4 for both, 0 to disable all:"
 	read value
-	echo $value > /data/data/leankernel/use_spi_crc
-	echo $value > /sys/module/mmc_core/parameters/use_spi_crc
+	case $value in
+	  1)
+		echo 0 > /sys/android_touch/doubletap2wake
+		rm -f /data/data/leankernel/doubletap2wake
+		echo 0 > /sys/android_touch/sweep2wake
+		rm -f /data/data/leankernel/sweep2wake
+		echo AUTO > /sys/bus/i2c/devices/1-004a/tsp
+		echo AUTO > /data/data/leankernel/tsp
+		;;
+	  2)
+		echo OFF > /sys/bus/i2c/devices/1-004a/tsp
+		rm -f /data/data/leankernel/tsp
+		echo 0 > /sys/android_touch/sweep2wake
+		rm -f /data/data/leankernel/sweep2wake
+		echo 1 > /sys/android_touch/doubletap2wake
+		echo 1 > /data/data/leankernel/doubletap2wake
+		;;
+	  3)
+		echo OFF > /sys/bus/i2c/devices/1-004a/tsp
+		rm -f /data/data/leankernel/tsp
+		echo 0 > /sys/android_touch/doubletap2wake
+		rm -f /data/data/leankernel/doubletap2wake
+		echo 15 > /sys/android_touch/sweep2wake
+		echo 15 > /data/data/leankernel/sweep2wake
+		;;
+	  4)
+		echo OFF > /sys/bus/i2c/devices/1-004a/tsp
+		rm -f /data/data/leankernel/tsp
+		echo 1 > /sys/android_touch/doubletap2wake
+		echo 1 > /data/data/leankernel/doubletap2wake
+		echo 15 > /sys/android_touch/sweep2wake
+		echo 15 > /data/data/leankernel/sweep2wake
+		;;
+	  0)
+		echo OFF > /sys/bus/i2c/devices/1-004a/tsp
+		rm -f /data/data/leankernel/tsp
+		echo 0 > /sys/android_touch/sweep2wake
+		rm -f /data/data/leankernel/sweep2wake
+		echo 0 > /sys/android_touch/doubletap2wake
+		rm -f /data/data/leankernel/doubletap2wake
+		;;
+	esac
 	echo "Done! (also will persist at boot)"
 	;;
 3)
