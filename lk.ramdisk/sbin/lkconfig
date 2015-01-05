@@ -155,10 +155,10 @@ case $option in
 9)
 	echo
 	if [ -a /system/xbin/awk ]; then
-		echo "1st column: # of times wakeup source could have aborted sleep."
-		echo "2nd column: # of times the source actually prevented sleep."
+		echo "1st column: total time wakeup source has been active."
+		echo "2nd column: max time the source was continuously active"
 		echo "-----"
-		cat /sys/kernel/debug/wakeup_sources | grep -v wakeup_count | awk '{ printf "%-8s%-6s %s\n",$4,$10,$1 }' | sort -rn | head -10
+		cat /sys/kernel/debug/wakeup_sources | grep -v wakeup_count | awk '{ printf "%-8s%-6s %s\n",$7,$8,$1 }' | sort -rn | head -10
 	else
 		echo "busybox required!"
 	fi
