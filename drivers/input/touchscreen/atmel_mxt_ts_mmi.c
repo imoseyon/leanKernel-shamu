@@ -1503,7 +1503,7 @@ static void mxt_proc_t93_messages(struct mxt_data *data, u8 *msg)
 		struct input_dev *input_dev = data->input_dev;
 
 #ifdef CONFIG_WAKE_GESTURES
-		if (dt2w_switch) set_vibrate(20);
+		if (dt2w_switch) set_vibrate(vib_strength);
 #endif
 		input_report_key(input_dev, KEY_POWER, 1);
 		input_report_key(input_dev, KEY_POWER, 0);
