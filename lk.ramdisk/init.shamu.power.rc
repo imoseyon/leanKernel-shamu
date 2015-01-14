@@ -92,3 +92,5 @@ on property:dev.bootcomplete=1
     write /sys/module/cpu_boost/parameters/input_boost_freq 1497600
     write /sys/module/cpu_boost/parameters/input_boost_ms 40
     write /dev/cpuctl/apps/cpu.notify_on_migrate 1
+
+    restorecon_recursive /sys/devices/system/cpu/cpufreq
