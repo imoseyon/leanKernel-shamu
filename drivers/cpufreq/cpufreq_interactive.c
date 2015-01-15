@@ -1293,7 +1293,7 @@ static int cpufreq_governor_interactive(struct cpufreq_policy *policy,
 
 		rc = sysfs_create_group(get_governor_parent_kobj(policy),
 				&interactive_attr_group);
-		if (rc) {
+		if (rc && rc != -EEXIST) {
 			mutex_unlock(&gov_lock);
 			return rc;
 		}
@@ -1327,10 +1327,6 @@ static int cpufreq_governor_interactive(struct cpufreq_policy *policy,
 		cpufreq_unregister_notifier(
 			&cpufreq_notifier_block, CPUFREQ_TRANSITION_NOTIFIER);
 		idle_notifier_unregister(&cpufreq_interactive_idle_nb);
-		sysfs_remove_group(get_governor_parent_kobj(policy),
-				&interactive_attr_group);
-		sysfs_remove_group(get_governor_parent_kobj(policy),
-				&interactivex_attr_group);
 		if (!have_governor_per_policy())
 			cpufreq_put_global_kobject();
 		mutex_unlock(&gov_lock);
