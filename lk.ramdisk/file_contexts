@@ -402,3 +402,6 @@
 
 /sys/devices/cycapsense_prog.1/cycapsense_fw             u:object_r:sysfs_capsense_update:s0
 /sys/devices/mmi_sar_ctrl.[0-9]*/sar_wifi                u:object_r:sysfs_sar_wifi:s0
+
+# Themes
+/data/system/theme(/.*)?  u:object_r:theme_data_file:s0
