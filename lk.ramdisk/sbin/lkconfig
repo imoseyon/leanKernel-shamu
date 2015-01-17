@@ -16,6 +16,7 @@ echo "4) set charging led"
 echo "5) set rgb control (advanced)"
 echo "6) set rgb control (simple)"
 echo
+echo "8) drop caches to free up RAM for apps"
 echo "9) check top 10 wake locks (ie. wakeup sources)"
 echo
 echo -n "please enter a number (or press enter to exit): "
@@ -151,6 +152,15 @@ case $option in
 	echo "$RGB" > /sys/devices/platform/kcal_ctrl.0/kcal
 	echo 1 > /sys/devices/platform/kcal_ctrl.0/kcal_ctrl
 	echo "Done! (also will persist at boot)"
+	;;
+8)
+	echo
+	grep MemFree /proc/meminfo
+	echo "Please wait..."
+	sync
+	echo 3 > /proc/sys/vm/drop_caches
+	grep MemFree /proc/meminfo
+	echo "Caches purged! You have more RAM for apps for a while."
 	;;
 9)
 	echo
