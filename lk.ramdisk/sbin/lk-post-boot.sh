@@ -11,6 +11,7 @@ chmod 444 /dev/frandom
 	"allow untrusted_app persist_file dir { open read getattr }" \
 	"allow debuggerd gpu_device chr_file { open read getattr }" \
 	"allow netd netd capability fsetid" \
+	"allow netd { hostapd dnsmasq } process fork" \
 	"allow { system_app shell } dalvikcache_data_file file write" \
 	"allow { zygote mediaserver bootanim appdomain }  theme_data_file dir { search r_file_perms r_dir_perms }" \
 	"allow { zygote mediaserver bootanim appdomain }  theme_data_file file { r_file_perms r_dir_perms }" \
