@@ -66,3 +66,13 @@ SFILE="/sys/android_touch/doubletap2wake"
 CFILE="/data/data/leankernel/sweep2wake"
 SFILE="/sys/android_touch/sweep2wake"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+
+# vibe strength
+CFILE="/data/data/leankernel/pwmvalue"
+SFILE="/sys/vibrator/pwmvalue"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+
+# cpu scheduler
+CFILE="/data/data/leankernel/current_sched_balance_policy"
+SFILE="/sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE

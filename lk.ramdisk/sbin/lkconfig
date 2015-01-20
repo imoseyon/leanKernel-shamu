@@ -15,9 +15,11 @@ echo "3) set cpu boost"
 echo "4) set charging led"
 echo "5) set rgb control (advanced)"
 echo "6) set rgb control (simple)"
+echo "7) set vibe strength"
+echo "8) set power saving mode for cpu scheduler"
 echo
-echo "8) drop caches to free up RAM for apps"
-echo "9) check top 10 wake locks (ie. wakeup sources)"
+echo "10) drop caches to free up RAM for apps"
+echo "11) check top 10 wake locks (ie. wakeup sources)"
 echo
 echo -n "please enter a number (or press enter to exit): "
 
@@ -44,8 +46,12 @@ case $option in
 		*"[battery-charging]"*) echo "Enabled" ;;
 		*) echo "Disabled" ;;
 	esac
-	echo -n "5) rgb control (red green blue): "
+	echo -n "5-6) rgb control (red green blue): "
 	cat /sys/devices/platform/kcal_ctrl.0/kcal
+	echo -n "7) vibe strength: "
+	cat /sys/vibrator/pwmvalue
+	echo -n "8) cpu scheduler power saving mode: "
+	cat /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
 	echo
 	;;
 1)
@@ -153,7 +159,34 @@ case $option in
 	echo 1 > /sys/devices/platform/kcal_ctrl.0/kcal_ctrl
 	echo "Done! (also will persist at boot)"
 	;;
+7) echo -n "Enter a number between 0 and 127 (stock) for vibe strength:"
+        read value
+	if [ -n "$value" ]; then
+		if [ $value -gt 126 ]; then 
+			rm -f /data/data/leankernel/pwmvalue
+			echo 127 > /sys/vibrator/pwmvalue
+		else
+			echo "$value" > /data/data/leankernel/pwmvalue
+			echo "$value" > /sys/vibrator/pwmvalue
+		fi
+		echo "Done! (also will persist at boot)"
+	fi
+	;;
 8)
+        echo -n "Enter 0 for performance (default) or 1 for powersaving:"
+        read value
+	if [ -n "$value" ]; then
+		if [ $value -eq 0 ]; then 
+			rm -f /data/data/leankernel/current_sched_balance_policy
+			echo performance > /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
+		else
+			echo powersaving > /data/data/leankernel/current_sched_balance_policy
+			echo powersaving > /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
+		fi
+		echo "Done! (also will persist at boot)"
+	fi
+	;;
+10)
 	echo
 	grep MemFree /proc/meminfo
 	echo "Please wait..."
@@ -162,7 +195,7 @@ case $option in
 	grep MemFree /proc/meminfo
 	echo "Caches purged! You have more RAM for apps for a while."
 	;;
-9)
+11)
 	echo
 	if [ -a /system/xbin/awk ]; then
 		echo "1st column: total time wakeup source has been active."
