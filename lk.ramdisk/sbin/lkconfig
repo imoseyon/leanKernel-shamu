@@ -4,11 +4,13 @@ detectsu=`ls /data/data`
 [ -z "$detectsu" ] && echo "Must be superuser!" && exit
 
 while true; do
+mc=1
 
 echo
 echo "leanKernel configurator"
 echo "---"
 echo "0) display current settings"
+echo
 echo "1) set interactiveX screen_off_maxfreq"
 echo "2) configure wake gesture control"
 echo "3) set cpu boost"
@@ -52,10 +54,9 @@ case $option in
 	cat /sys/vibrator/pwmvalue
 	echo -n "8) cpu scheduler power saving mode: "
 	cat /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
-	echo
 	;;
 1)
-	echo -n "Enter a number between 0 and 5 (0:650mhz,1:883mhz,2:1.2ghz,3:1.5ghz,4:2.2ghz/default,5:disable): "
+	echo -n "Enter a number between 0 and 5 (0:650mhz,1:883mhz,2:1.2ghz,3:1.5ghz,4:2.2ghz/stock,5:disable): "
 	read value
 	case $value in
 	  0) FREQ=652800;;
@@ -64,13 +65,17 @@ case $option in
 	  3) FREQ=1574400;;
 	  4) FREQ=2265600;;
 	  5) FREQ=2649600;;
+	  *) mc=0;;
 	esac
-	echo $FREQ > /data/data/leankernel/screen_off_maxfreq
-	echo $FREQ > /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq
-	echo "Done! (also will persist at boot)"
+	if [ $mc -eq 1 ]; then
+	  [ $value -eq 5 ] && rm -f /data/data/leankernel/screen_off_maxfreq \
+		|| echo $FREQ > /data/data/leankernel/screen_off_maxfreq
+	  echo $FREQ > /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq
+	  echo "Done! (also will persist at boot)"
+	fi
 	;;
 2)
-	echo -n "Enter 1 for stock dt2w, 2 for haptic dt2w, 3 for s2w, 4 for both, 0 to disable all:"
+	echo -n "Enter 1 for stock dt2w, 2 for haptic dt2w, 3 for s2w, 4 for both, 0 to disable all (stock):"
 	read value
 	case $value in
 	  1)
@@ -113,28 +118,42 @@ case $option in
 		echo 0 > /sys/android_touch/doubletap2wake
 		rm -f /data/data/leankernel/doubletap2wake
 		;;
+	  *) mc=0;;
 	esac
-	echo "Done! (also will persist at boot)"
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
 3)
-        echo -n "Enter Y to enable, N to disable cpu boost: "
+        echo -n "Enter Y to enable (stock), N to disable cpu boost: "
         read value
-        echo $value > /data/data/leankernel/cpuboost_enable
-        echo $value > /sys/module/cpu_boost/parameters/cpuboost_enable
-        echo "Done! (also will persist at boot)"
+	case $value in
+	  Y|y)
+		rm -f /data/data/leankernel/cpuboost_enable
+		echo Y > /sys/module/cpu_boost/parameters/cpuboost_enable
+		;;
+	  N|n)
+		echo N > /data/data/leankernel/cpuboost_enable
+		echo N > /sys/module/cpu_boost/parameters/cpuboost_enable
+		;;
+	  *) mc=0;;
+	esac
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
 4)
-        echo -n "Enter Y to enable, N to disable charging led: "
+        echo -n "Enter Y to enable, N to disable (stock) charging led: "
         read value
-	if [ "$value" == "Y" ] || [ "$value" == "y" ]; then 
+	case $value in
+	  Y|y)
         	echo battery-charging > /data/data/leankernel/charging_led
 		echo battery-charging > /sys/class/leds/charging/trigger
 		echo 1 > /sys/class/leds/charging/max_brightness
-	else
+		;;
+	  N|n)
         	rm -f /data/data/leankernel/charging_led
 		echo none > /sys/class/leds/charging/trigger
-	fi
-        echo "Done! (also will persist at boot)"
+		;;
+	  *) mc=0;;
+	esac
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
 5)
         echo -n "Enter three values (red, green, blue) between 0-255 (default is 255 255 255):"
@@ -143,8 +162,9 @@ case $option in
 		echo "$value" > /data/data/leankernel/kcal
 		echo "$value" > /sys/devices/platform/kcal_ctrl.0/kcal
 		echo 1 > /sys/devices/platform/kcal_ctrl.0/kcal_ctrl
-		echo "Done! (also will persist at boot)"
+	else mc=0
 	fi
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
 6)
         echo -n "Enter 1 for reference(6500k), 2 for cool(7400k), 3 for stock(6250k):"
@@ -152,39 +172,48 @@ case $option in
 	case $value in
 	  1) RGB="248 246 255";;
 	  2) RGB="237 235 255";;
-	  *) RGB="255 255 255";;
+	  3) RGB="255 255 255";;
+	  *) mc=0;;
 	esac
-	echo "$RGB" > /data/data/leankernel/kcal
-	echo "$RGB" > /sys/devices/platform/kcal_ctrl.0/kcal
-	echo 1 > /sys/devices/platform/kcal_ctrl.0/kcal_ctrl
-	echo "Done! (also will persist at boot)"
+	if [ $mc -eq 1 ]; then
+	  [ $value -eq 3 ] && rm -f /data/data/leankernel/kcal || echo "$RGB" > /data/data/leankernel/kcal
+	  echo "$RGB" > /sys/devices/platform/kcal_ctrl.0/kcal
+	  echo 1 > /sys/devices/platform/kcal_ctrl.0/kcal_ctrl
+	  echo "Done! (also will persist at boot)"
+	fi
 	;;
 7) echo -n "Enter a number between 0 and 127 (stock) for vibe strength:"
         read value
-	if [ -n "$value" ]; then
-		if [ $value -gt 126 ]; then 
-			rm -f /data/data/leankernel/pwmvalue
-			echo 127 > /sys/vibrator/pwmvalue
-		else
-			echo "$value" > /data/data/leankernel/pwmvalue
-			echo "$value" > /sys/vibrator/pwmvalue
+	case $value in
+	  127)
+		rm -f /data/data/leankernel/pwmvalue
+		echo 127 > /sys/vibrator/pwmvalue
+		;;
+	  *)
+		if [ -n "$value" ] && [ $value -lt 127 ] && [ $value -ge 0 ]; then
+		  echo "$value" > /data/data/leankernel/pwmvalue
+		  echo "$value" > /sys/vibrator/pwmvalue
+		else mc=0
 		fi
-		echo "Done! (also will persist at boot)"
-	fi
+		;;
+	esac
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
 8)
-        echo -n "Enter 0 for performance (default) or 1 for powersaving:"
+        echo -n "Enter 0 for performance (stock) or 1 for powersaving:"
         read value
-	if [ -n "$value" ]; then
-		if [ $value -eq 0 ]; then 
-			rm -f /data/data/leankernel/current_sched_balance_policy
-			echo performance > /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
-		else
-			echo powersaving > /data/data/leankernel/current_sched_balance_policy
-			echo powersaving > /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
-		fi
-		echo "Done! (also will persist at boot)"
-	fi
+	case $value in
+	  0)
+                rm -f /data/data/leankernel/current_sched_balance_policy
+                echo performance > /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
+		;;
+	  1)
+		echo powersaving > /data/data/leankernel/current_sched_balance_policy
+		echo powersaving > /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
+		;;
+	  *) mc=0;;
+	esac
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
 10)
 	echo
@@ -208,9 +237,12 @@ case $option in
 		echo "busybox required!"
 	fi
 	;;
+99)
+	echo Y > /sys/module/selinux/parameters/force_audit;;
 *)
 	exit
 	;;
 esac
+[ $mc -eq 0 ] && echo && echo "No change made."
 echo
 done
