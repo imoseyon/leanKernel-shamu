@@ -35,6 +35,10 @@
 #define SEEK_HOLE	4	/* seek to the next hole */
 #define SEEK_MAX	SEEK_HOLE
 
+#define RENAME_NOREPLACE	(1 << 0)	/* Don't overwrite target */
+#define RENAME_EXCHANGE		(1 << 1)	/* Exchange source and dest */
+#define RENAME_WHITEOUT		(1 << 2)	/* Whiteout source */
+
 struct fstrim_range {
 	__u64 start;
 	__u64 len;
@@ -49,9 +53,9 @@ struct files_stat_struct {
 };
 
 struct inodes_stat_t {
-	int nr_inodes;
-	int nr_unused;
-	int dummy[5];		/* padding for sysctl ABI compatibility */
+	long nr_inodes;
+	long nr_unused;
+	long dummy[5];		/* padding for sysctl ABI compatibility */
 };
 
 
@@ -153,6 +157,7 @@ struct inodes_stat_t {
 #define FIFREEZE	_IOWR('X', 119, int)	/* Freeze */
 #define FITHAW		_IOWR('X', 120, int)	/* Thaw */
 #define FITRIM		_IOWR('X', 121, struct fstrim_range)	/* Trim */
+#define FS_IOC_SHUTDOWN	_IOR('X', 125, __u32)	/* Shutdown */
 
 #define	FS_IOC_GETFLAGS			_IOR('f', 1, long)
 #define	FS_IOC_SETFLAGS			_IOW('f', 2, long)
@@ -200,5 +205,12 @@ struct inodes_stat_t {
 #define SYNC_FILE_RANGE_WAIT_BEFORE	1
 #define SYNC_FILE_RANGE_WRITE		2
 #define SYNC_FILE_RANGE_WAIT_AFTER	4
+
+/*
+ * Flags for going down operation used by FS_IOC_GOINGDOWN
+ */
+#define FS_GOING_DOWN_FULLSYNC	0x0	/* going down with full sync */
+#define FS_GOING_DOWN_METASYNC	0x1	/* going down with metadata */
+#define FS_GOING_DOWN_NOSYNC	0x2	/* going down */
 
 #endif /* _UAPI_LINUX_FS_H */
