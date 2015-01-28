@@ -19,6 +19,7 @@ echo "5) set rgb control (advanced)"
 echo "6) set rgb control (simple)"
 echo "7) set vibe strength"
 echo "8) set power saving mode for cpu scheduler"
+echo "9) set smb135x wakelock"
 echo
 echo "10) drop caches to free up RAM for apps"
 echo "11) check top 10 wake locks (ie. wakeup sources)"
@@ -54,6 +55,8 @@ case $option in
 	cat /sys/vibrator/pwmvalue
 	echo -n "8) cpu scheduler power saving mode: "
 	cat /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
+	echo -n "9) smb135x wakelock: "
+	cat /sys/module/smb135x_charger/parameters/use_wlock
 	;;
 1)
 	echo -n "Enter a number between 0 and 5 (0:650mhz,1:883mhz,2:1.2ghz,3:1.5ghz,4:2.2ghz/stock,5:disable): "
@@ -210,6 +213,22 @@ case $option in
 	  1)
 		echo powersaving > /data/data/leankernel/current_sched_balance_policy
 		echo powersaving > /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
+		;;
+	  *) mc=0;;
+	esac
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
+	;;
+9)
+        echo -n "Enter Y to enable (stock) or N to disable smb135x wakelock:"
+        read value
+	case $value in
+	  y|Y)
+                rm -f /data/data/leankernel/smb135x_use_wlock
+                echo Y > /sys/module/smb135x_charger/parameters/use_wlock
+		;;
+	  n|N)
+		echo N > /data/data/leankernel/smb135x_use_wlock
+		echo N > /sys/module/smb135x_charger/parameters/use_wlock
 		;;
 	  *) mc=0;;
 	esac

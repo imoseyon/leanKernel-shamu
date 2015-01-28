@@ -77,3 +77,8 @@ SFILE="/sys/vibrator/pwmvalue"
 CFILE="/data/data/leankernel/current_sched_balance_policy"
 SFILE="/sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+
+# smb135x wakelock
+CFILE="/data/data/leankernel/smb135x_use_wlock"
+SFILE="/sys/module/smb135x_charger/parameters/use_wlock"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE
