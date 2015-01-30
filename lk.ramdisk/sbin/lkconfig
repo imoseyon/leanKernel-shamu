@@ -13,7 +13,7 @@ echo "0) display current settings"
 echo
 echo "1) set interactiveX screen_off_maxfreq"
 echo "2) configure wake gesture control"
-echo "3) set cpu boost"
+echo "3) set cpu boost (nofreq mpdecision may be needed)"
 echo "4) set charging led"
 echo "5) set rgb control (advanced)"
 echo "6) set rgb control (simple)"
