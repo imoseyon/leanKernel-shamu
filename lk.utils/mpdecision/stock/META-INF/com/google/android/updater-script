@@ -1,6 +1,0 @@
-show_progress(0.500000, 0);
-mount("ext4", "EMMC", "/dev/block/platform/msm_sdcc.1/by-name/system", "/system");
-package_extract_dir("system", "/system");
-set_perm(0, 0, 0755, "/system/bin/mpdecision");
-unmount("/system");
-show_progress(0.100000, 0);
