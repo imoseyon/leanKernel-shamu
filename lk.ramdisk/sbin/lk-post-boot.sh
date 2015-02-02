@@ -82,3 +82,27 @@ SFILE="/sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
 CFILE="/data/data/leankernel/smb135x_use_wlock"
 SFILE="/sys/module/smb135x_charger/parameters/use_wlock"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+
+# lkcc
+CFILE="/data/data/leankernel/cc"
+if [ -f "/data/data/leankernel/cc" ]; then
+	val=`cat /data/data/leankernel/cc`
+	case $val in
+	  1)
+		echo N > /sys/module/cpu_boost/parameters/cpuboost_enable
+		# nofreq mpdecision binary should be in already
+		# add mp5sum check etc later
+		;;
+	  2)
+		echo Y > /sys/module/cpu_boost/parameters/cpuboost_enable
+		stop mpdecision
+		echo 1 > /sys/devices/system/cpu/cpu1/online
+		echo 1 > /sys/devices/system/cpu/cpu2/online
+		echo 1 > /sys/devices/system/cpu/cpu3/online
+		echo 300000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+		echo 300000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+		echo 300000 > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+		echo 300000 > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+		;;
+	esac
+fi

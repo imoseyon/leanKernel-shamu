@@ -1,0 +1,77 @@
+#!/system/bin/sh
+
+echo
+echo "leanKernel core control"
+echo "---"
+echo "WARNING: Using this script may change things outside the kernel (ie. mpdecision),"
+echo "and may interfere with other apps like Trickstermod. Use at your own risk!"
+echo
+echo "0) display current setting"
+echo
+echo "1) prevent mpdecision from scaling cpu - 2 cores online"
+echo "2) prevent mpdecision from scaling cpu - 4 cores online"
+echo "3) back to stock/default - reenable mpdecision"
+echo
+echo -n "please enter a number (or press enter to exit): "
+
+read option
+
+case $option in
+
+0)
+	echo
+	if [ -f "/data/data/leankernel/cc" ]; then
+		cur=`cat /data/data/leankernel/cc`
+		case $cur in
+			1) echo "Setting 1: Nofreq mpdecision. Cpu-boost off. 2 cores online";;
+			2) echo "Setting 2: Mpdecision disabled. Cpu-boost on. 4 cores online";;
+			*) echo "Unknown option - shouldn't be here";;
+		esac
+	else
+		echo "Default setting: Stock mpdecision. 2 cores online"
+	fi
+	;;
+1)
+	echo 1 > /data/data/leankernel/cc
+	echo N > /sys/module/cpu_boost/parameters/cpuboost_enable
+	stop mpdecision
+	mount -o rw,remount /system
+	cp /sbin/nofreq-mpd /system/bin/mpdecision
+	chmod 755 /system/bin/mpdecision
+	echo 300000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+	echo 300000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+        mount -o ro,remount /system
+	start mpdecision
+	echo "Done! (also will persist at boot)"
+        ;;
+2)
+	echo 2 > /data/data/leankernel/cc
+	echo Y > /sys/module/cpu_boost/parameters/cpuboost_enable
+	rm -f /data/data/leankernel/cpuboost_enable
+	stop mpdecision
+	echo 1 > /sys/devices/system/cpu/cpu1/online
+	echo 1 > /sys/devices/system/cpu/cpu2/online
+	echo 1 > /sys/devices/system/cpu/cpu3/online
+	echo 300000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+	echo 300000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+	echo 300000 > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+	echo 300000 > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+	echo "Done! (also will persist at boot)"
+	;;
+3)
+	rm -f /data/data/leankernel/cc
+	echo Y > /sys/module/cpu_boost/parameters/cpuboost_enable
+	rm -f /data/data/leankernel/cpuboost_enable
+	stop mpdecision
+	mount -o rw,remount /system
+	cp /sbin/stock-mpd /system/bin/mpdecision
+	chmod 755 /system/bin/mpdecision
+        mount -o ro,remount /system
+	start mpdecision
+	echo "Done! (also will persist at boot)"
+	;;
+*)
+        exit
+        ;;
+
+esac
