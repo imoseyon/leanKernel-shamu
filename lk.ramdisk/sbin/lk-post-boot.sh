@@ -15,8 +15,10 @@ chmod 444 /dev/frandom
 	"allow { system_app shell } dalvikcache_data_file file write" \
 	"allow { zygote mediaserver bootanim appdomain }  theme_data_file dir { search r_file_perms r_dir_perms }" \
 	"allow { zygote mediaserver bootanim appdomain }  theme_data_file file { r_file_perms r_dir_perms }" \
-	"allow system_server { rootfs resourcecache_data_file } dir { open read write getattr add_name setattr create remove_name rmdir unlink link }"\
-	"allow system_server resourcecache_data_file file { open read write getattr add_name setattr create remove_name unlink link }"
+	"allow system_server { rootfs resourcecache_data_file } dir { open read write getattr add_name setattr create remove_name rmdir unlink link }" \
+	"allow system_server resourcecache_data_file file { open read write getattr add_name setattr create remove_name unlink link }" \
+	"allow system_server dex2oat_exec file rx_file_perms" \
+	"allow drmserver theme_data_file file r_file_perms"
 
 # take a little more RAM from file/dir caches and give them to apps 
 echo 200 > /proc/sys/vm/vfs_cache_pressure
@@ -95,6 +97,17 @@ if [ -f "/data/data/leankernel/cc" ]; then
 		;;
 	  2)
 		echo Y > /sys/module/cpu_boost/parameters/cpuboost_enable
+		stop mpdecision
+		echo 1 > /sys/devices/system/cpu/cpu1/online
+		echo 1 > /sys/devices/system/cpu/cpu2/online
+		echo 1 > /sys/devices/system/cpu/cpu3/online
+		echo 300000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+		echo 300000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+		echo 300000 > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+		echo 300000 > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+		;;
+	  3)
+		echo N > /sys/module/cpu_boost/parameters/cpuboost_enable
 		stop mpdecision
 		echo 1 > /sys/devices/system/cpu/cpu1/online
 		echo 1 > /sys/devices/system/cpu/cpu2/online
