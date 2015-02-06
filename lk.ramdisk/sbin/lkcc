@@ -1,5 +1,8 @@
 #!/system/bin/sh
 
+minfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq`
+
+while true; do
 echo
 echo "leanKernel core control"
 echo "---"
@@ -14,8 +17,6 @@ echo "3) prevent mpdecision from scaling cpu - 4 cores online (cpu-boost off)"
 echo "4) back to stock/default - reenable mpdecision"
 echo
 echo -n "please enter a number (or press enter to exit): "
-
-minfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq`
 
 read option
 
@@ -63,7 +64,7 @@ case $option in
 	echo "Done! (also will persist at boot)"
 	;;
 3)
-	echo 2 > /data/data/leankernel/cc
+	echo 3 > /data/data/leankernel/cc
 	echo N > /sys/module/cpu_boost/parameters/cpuboost_enable
 	stop mpdecision
 	echo 1 > /sys/devices/system/cpu/cpu1/online
@@ -92,3 +93,4 @@ case $option in
         ;;
 
 esac
+done

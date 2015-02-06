@@ -239,7 +239,7 @@ case $option in
 	fi
 	;;
 12)
-	lkcc
+	exec lkcc
 	;;
 99)
 	echo Y > /sys/module/selinux/parameters/force_audit;;
