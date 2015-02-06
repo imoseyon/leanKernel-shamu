@@ -13,12 +13,13 @@ echo "0) display current settings"
 echo
 echo "1) set interactiveX screen_off_maxfreq"
 echo "2) configure wake gesture control"
-echo "3) set smb135x wakelock"
-echo "4) set charging led"
+echo "3) enable/disable smb135x wakelock"
+echo "4) enable/disable charging led"
 echo "5) set rgb control (advanced)"
 echo "6) set rgb control (simple)"
 echo "7) set vibe strength"
 echo "8) set power saving mode for cpu scheduler"
+echo "9) enable/disable faux sound control"
 echo
 echo "10) drop caches to free up RAM for apps"
 echo "11) check top 10 wake locks (ie. wakeup sources)"
@@ -55,6 +56,8 @@ case $option in
 	cat /sys/vibrator/pwmvalue
 	echo -n "8) cpu scheduler power saving mode: "
 	cat /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
+	echo -n "9) faux sound control: "
+	cat /sys/module/snd_soc_wcd9320/parameters/enable_fs
 	;;
 1)
 	echo -n "Enter a number between 0 and 5 (0:650mhz,1:883mhz,2:1.2ghz,3:1.5ghz,4:2.2ghz/stock,5:disable): "
@@ -211,6 +214,22 @@ case $option in
 	  1)
 		echo powersaving > /data/data/leankernel/current_sched_balance_policy
 		echo powersaving > /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
+		;;
+	  *) mc=0;;
+	esac
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
+	;;
+9)
+        echo -n "Enter Y to enable or N to disable (stock) faux sound control:"
+        read value
+	case $value in
+	  n|N)
+                rm -f /data/data/leankernel/sc
+                echo N > /sys/module/snd_soc_wcd9320/parameters/enable_fs
+		;;
+	  y|Y)
+		echo Y > /data/data/leankernel/sc
+		echo Y > /sys/module/snd_soc_wcd9320/parameters/enable_fs
 		;;
 	  *) mc=0;;
 	esac

@@ -119,3 +119,8 @@ if [ -f "/data/data/leankernel/cc" ]; then
 		;;
 	esac
 fi
+
+# faux sound control
+CFILE="/data/data/leankernel/sc"
+SFILE="/sys/module/snd_soc_wcd9320/parameters/enable_fs"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE
