@@ -11,15 +11,15 @@ echo "leanKernel configurator"
 echo "---"
 echo "0) display current settings"
 echo
-echo "1) set interactiveX screen_off_maxfreq"
-echo "2) configure wake gesture control"
-echo "3) enable/disable smb135x wakelock"
-echo "4) enable/disable charging led"
-echo "5) set rgb control (advanced)"
-echo "6) set rgb control (simple)"
-echo "7) set vibe strength"
-echo "8) set power saving mode for cpu scheduler"
-echo "9) enable/disable faux sound control"
+echo "1) interactiveX screen_off_maxfreq"
+echo "2) wake gesture control"
+echo "3) wakelock control"
+echo "4) charging led"
+echo "5) rgb control (advanced)"
+echo "6) rgb control (simple)"
+echo "7) vibe strength"
+echo "8) power saving mode for cpu scheduler"
+echo "9) faux sound control"
 echo
 echo "10) drop caches to free up RAM for apps"
 echo "11) check top 10 wake locks (ie. wakeup sources)"
@@ -42,8 +42,10 @@ case $option in
 	hdt=`cat /sys/android_touch/doubletap2wake`
 	s2w=`cat /sys/android_touch/sweep2wake`
 	echo "$sdt - $hdt - $s2w"
-	echo -n "3) smb135x wakelock: "
-	cat /sys/module/smb135x_charger/parameters/use_wlock
+	echo -n "3) wakelock (smb135x - sensor_ind): "
+	smb=`cat /sys/module/smb135x_charger/parameters/use_wlock`
+	si=`cat /sys/module/wakeup/parameters/enable_si_ws`
+	echo "$smb - $si"
 	echo -n "4) charging led: "
 	value=`cat /sys/class/leds/charging/trigger`
  	case "$value" in
@@ -127,16 +129,24 @@ case $option in
 	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
 3)
-        echo -n "Enter Y to enable (stock) or N to disable smb135x wakelock:"
+        echo -n "Wake sources: enter 0/1 to disable/enable smb135x, 2/3 to disable/enable sensor_ind:"
         read value
 	case $value in
-	  y|Y)
+	  0)
+		echo N > /data/data/leankernel/smb135x_use_wlock
+		echo N > /sys/module/smb135x_charger/parameters/use_wlock
+		;;
+	  1)
                 rm -f /data/data/leankernel/smb135x_use_wlock
                 echo Y > /sys/module/smb135x_charger/parameters/use_wlock
 		;;
-	  n|N)
-		echo N > /data/data/leankernel/smb135x_use_wlock
-		echo N > /sys/module/smb135x_charger/parameters/use_wlock
+	  2)
+		echo N > /data/data/leankernel/sensor_ind
+		echo N > /sys/module/wakeup/parameters/enable_si_ws
+		;;
+	  3)
+		rm -f /data/data/leankernel/sensor_ind
+		echo Y > /sys/module/wakeup/parameters/enable_si_ws
 		;;
 	  *) mc=0;;
 	esac

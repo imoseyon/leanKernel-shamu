@@ -85,6 +85,11 @@ CFILE="/data/data/leankernel/smb135x_use_wlock"
 SFILE="/sys/module/smb135x_charger/parameters/use_wlock"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE
 
+# sensor_ind wakelock
+CFILE="/data/data/leankernel/sensor_ind"
+SFILE="/sys/module/wakeup/parameters/enable_si_ws"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+
 # lkcc
 CFILE="/data/data/leankernel/cc"
 if [ -f "/data/data/leankernel/cc" ]; then
