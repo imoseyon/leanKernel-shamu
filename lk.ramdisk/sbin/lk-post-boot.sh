@@ -18,6 +18,7 @@ chmod 444 /dev/frandom
 	"allow system_server { rootfs resourcecache_data_file } dir { open read write getattr add_name setattr create remove_name rmdir unlink link }" \
 	"allow system_server resourcecache_data_file file { open read write getattr add_name setattr create remove_name unlink link }" \
 	"allow system_server dex2oat_exec file rx_file_perms" \
+	"allow mediaserver mediaserver_tmpfs file execute" \
 	"allow drmserver theme_data_file file r_file_perms"
 
 # take a little more RAM from file/dir caches and give them to apps 
