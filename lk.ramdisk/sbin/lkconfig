@@ -145,7 +145,7 @@ case $option in
 		echo N > /sys/module/wakeup/parameters/enable_si_ws
 		;;
 	  3)
-		rm -f /data/data/leankernel/sensor_ind
+		echo Y > /data/data/leankernel/sensor_ind
 		echo Y > /sys/module/wakeup/parameters/enable_si_ws
 		;;
 	  *) mc=0;;
