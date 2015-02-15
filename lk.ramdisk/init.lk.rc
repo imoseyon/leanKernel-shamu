@@ -1,15 +1,20 @@
-on boot
-     chown system system /sys/class/leds/charging/brightness
-     chown system system /sys/class/leds/charging/max_brightness
 
-service supolicy /system/xbin/supolicy --live "allow adbd adbd process setcurrent" \
+service supolicy /sbin/supolicy --live "allow adbd adbd process setcurrent" \
 	"allow adbd init process dyntransition" \
+	"allow sensors diag_device chr_file { read write open ioctl }" \
  	"allow { isolated_app shared_relro } init unix_stream_socket connectto"	
      disabled
      oneshot
 
-on post-fs-data
+on fs
      start supolicy
+
+#on post-fs-data
+#     write /sys/fs/selinux/enforce 0
+
+on boot
+     chown system system /sys/class/leds/charging/brightness
+     chown system system /sys/class/leds/charging/max_brightness
 
 service lk-post-boot /sbin/lk-post-boot.sh
      class late_start
