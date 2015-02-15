@@ -6,11 +6,15 @@ service supolicy /sbin/supolicy --live "allow adbd adbd process setcurrent" \
      disabled
      oneshot
 
+service selinux_mode /sbin/lk-selinux-mode.sh
+     disabled
+     oneshot
+
 on fs
      start supolicy
 
-#on post-fs-data
-#     write /sys/fs/selinux/enforce 0
+on post-fs-data
+     start selinux_mode
 
 on boot
      chown system system /sys/class/leds/charging/brightness

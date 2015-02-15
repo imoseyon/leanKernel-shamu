@@ -20,10 +20,11 @@ echo "6) rgb control (simple)"
 echo "7) vibe strength"
 echo "8) power saving mode for cpu scheduler"
 echo "9) faux sound control"
+echo "10) selinux mode"
 echo
-echo "10) drop caches to free up RAM for apps"
-echo "11) check top 10 wake locks (ie. wakeup sources)"
-echo "12) launch core control configurator"
+echo "20) drop caches to free up RAM for apps"
+echo "21) check top 10 wake locks (ie. wakeup sources)"
+echo "22) launch core control configurator"
 echo
 echo -n "please enter a number (or press enter to exit): "
 
@@ -45,7 +46,7 @@ case $option in
 	echo -n "3) wakelock (smb135x - sensor_ind): "
 	smb=`cat /sys/module/smb135x_charger/parameters/use_wlock`
 	si=`cat /sys/module/wakeup/parameters/enable_si_ws`
-	echo "$smb - $si"
+	echo "$smb - $si (N = disabled)"
 	echo -n "4) charging led: "
 	value=`cat /sys/class/leds/charging/trigger`
  	case "$value" in
@@ -60,6 +61,8 @@ case $option in
 	cat /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
 	echo -n "9) faux sound control: "
 	cat /sys/module/snd_soc_wcd9320/parameters/enable_fs
+	echo -n "10) selinux mode (1 is enforcing, 0 is permissive): "
+	cat /sys/fs/selinux/enforce
 	;;
 1)
 	echo -n "Enter a number between 0 and 5 (0:650mhz,1:883mhz,2:1.2ghz,3:1.5ghz,4:2.2ghz/stock,5:disable): "
@@ -246,6 +249,22 @@ case $option in
 	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
 10)
+	echo -n "Enter 1 for enforcing (stock) or 0 for permissive (not generally recommended):"
+	read value
+	case $value in
+	  1)
+		rm -f /data/data/leankernel/selinux_permissive
+		echo 1 > /sys/fs/selinux/enforce
+		;;
+	  0)
+		touch /data/data/leankernel/selinux_permissive
+		echo 0 > /sys/fs/selinux/enforce
+		;;
+	  *) mc=0;;
+	esac
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
+	;;
+20)
 	echo
 	grep MemFree /proc/meminfo
 	echo "Please wait..."
@@ -254,11 +273,12 @@ case $option in
 	grep MemFree /proc/meminfo
 	echo "Caches purged! You have more RAM for apps for a while."
 	;;
-11)
+21)
 	echo
 	if [ -a /system/xbin/awk ]; then
 		echo "1st column: total time wakeup source has been active."
-		echo "2nd column: max time the source was continuously active"
+		echo "2nd column: max time the source was continuously active."
+		echo "(The numbers are duration in seconds)"
 		echo "-----"
 		cat /sys/kernel/debug/wakeup_sources | grep -v wakeup_count \
 		  | awk '{ printf "%-10s%-8s %s\n",int($7/1000),int($8/1000),$1 }' \
@@ -267,7 +287,7 @@ case $option in
 		echo "busybox required!"
 	fi
 	;;
-12)
+22)
 	exec lkcc
 	;;
 99)
