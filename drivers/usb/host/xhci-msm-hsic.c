@@ -928,7 +928,7 @@ static int mxhci_hsic_suspend(struct mxhci_hsic_hcd *mxhci)
 	/* disable force-on mode for periph_on */
 	clk_set_flags(mxhci->system_clk, CLKFLAG_NORETAIN_PERIPH);
 
-	if (wl_divide > 0) pm_relax(mxhci->dev);
+	pm_relax(mxhci->dev);
 
 	dev_dbg(mxhci->dev, "HSIC-USB in low power mode\n");
 	xhci_dbg_log_event(&dbg_hsic, NULL, "Controller suspended", 0);
