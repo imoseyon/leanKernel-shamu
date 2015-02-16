@@ -3,6 +3,9 @@
 detectsu=`ls /data/data`
 [ -z "$detectsu" ] && echo "Must be superuser!" && exit
 
+minfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq`
+maxfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq`
+
 while true; do
 mc=1
 
@@ -11,7 +14,7 @@ echo "leanKernel configurator"
 echo "---"
 echo "0) display current settings"
 echo
-echo "1) interactiveX screen_off_maxfreq"
+echo "1) cpu frequency control"
 echo "2) wake gesture control"
 echo "3) wakelock control"
 echo "4) charging led"
@@ -35,9 +38,15 @@ case $option in
 	echo
 	echo "current settings"
 	echo "----------------"
-	echo -n "1) interactiveX screen off maxfreq: "
-	value=`cat /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq`
-	[ $value -gt 2600000 ] && echo "Disabled" || echo $value
+	smax=`cat /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq`
+	[ $smax -gt 2600000 ] && smax="Disabled"
+	cmffile="/data/data/leankernel/minfreq"
+	[ -f $cmffile ] && cminfreq=`cat $cmffile` \
+		|| cminfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq`
+	cmffile="/data/data/leankernel/maxfreq"
+	[ -f $cmffile ] && cmaxfreq=`cat $cmffile` \
+		|| cmaxfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq`
+	echo "1) cpu min freq: $cminfreq, max freq: $cmaxfreq, interactiveX screenoff max: $smax "
 	sdt=`cat /sys/bus/i2c/devices/1-004a/tsp`
 	hdt=`cat /sys/android_touch/doubletap2wake`
 	s2w=`cat /sys/android_touch/sweep2wake`
@@ -55,7 +64,7 @@ case $option in
 		*"[battery-charging]"*) echo "Enabled" ;;
 		*) echo "Disabled" ;;
 	esac
-	echo -n "5/6) rgb control (red green blue): "
+	echo -n "5) rgb control (red green blue): "
 	cat /sys/devices/platform/kcal_ctrl.0/kcal
 	echo -n "7) vibe strength: "
 	cat /sys/vibrator/pwmvalue
@@ -67,23 +76,69 @@ case $option in
 	cat /sys/fs/selinux/enforce
 	;;
 1)
-	echo -n "Enter a number between 0 and 5 (0:650mhz,1:883mhz,2:1.2ghz,3:1.5ghz,4:2.2ghz/default,5:disable/stock): "
-	read value
-	case $value in
-	  0) FREQ=652800;;
-	  1) FREQ=883200;;
-	  2) FREQ=1267200;;
-	  3) FREQ=1574400;;
-	  4) FREQ=2265600;;
-	  5) FREQ=2649600;;
-	  *) mc=0;;
+	echo -n "Enter 1 for min freq, 2 for max freq, 3 for interactiveX screen-off freq:"
+	read select
+	case $select in
+	  1) 
+		[ $minfreq -lt 300000 ] && echo -n "Enter 0 (223mhz/default), 1 (300mhz), 2 (422mhz), 3 (653mhz):" || \
+			echo -n "Enter 1 (300mhz/default), 2 (422mhz), 3 (653mhz):"
+		read value
+		case $value in
+		  0) FREQ=223200;;
+		  1) FREQ=300000;;
+		  2) FREQ=422400;;
+		  3) FREQ=652800;;
+		  *) mc=0;;
+		esac
+		if [ $mc -eq 1 ]; then
+		  echo $FREQ > /data/data/leankernel/minfreq
+		  echo $FREQ > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+		  echo $FREQ > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq 2> /dev/null
+		  echo $FREQ > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq 2> /dev/null
+		  echo $FREQ > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq 2> /dev/null
+		fi
+		;;
+	  2) 
+		[ $maxfreq -gt 2649600 ] && echo -n "Enter 0 (2.9ghz/default), 1 (2.6ghz), 2 (2.5ghz), 3 (2.2ghz):" || \
+			echo -n "Enter 1 (2.6ghz/default), 2 (2.5ghz), 3 (2.2ghz):"
+		read value
+		case $value in
+		  0) FREQ=2880000;;
+		  1) FREQ=2649600;;
+		  2) FREQ=2496000;;
+		  3) FREQ=2265600;;
+		  *) mc=0;;
+		esac
+		if [ $mc -eq 1 ]; then
+		  echo $FREQ > /data/data/leankernel/maxfreq
+		  echo $FREQ > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+		  echo $FREQ > /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq 2> /dev/null
+		  echo $FREQ > /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq 2> /dev/null
+		  echo $FREQ > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq 2> /dev/null
+		fi
+		;;
+	  3)
+		echo -n "Enter a number between 0 and 5 (0:650mhz,1:883mhz,2:1.2ghz,3:1.5ghz,4:2.2ghz/default,5:disable/stock): "
+		read value
+		case $value in
+		  0) FREQ=652800;;
+		  1) FREQ=883200;;
+		  2) FREQ=1267200;;
+		  3) FREQ=1574400;;
+		  4) FREQ=2265600;;
+		  5) FREQ=2649600;;
+		  *) mc=0;;
+		esac
+		if [ $mc -eq 1 ]; then
+		  [ $value -eq 5 ] && rm -f /data/data/leankernel/screen_off_maxfreq \
+			|| echo $FREQ > /data/data/leankernel/screen_off_maxfreq
+		  echo $FREQ > /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq
+		  echo "Done! (also will persist at boot)"
+		fi
+		;;
+	   *) mc=0;;
 	esac
-	if [ $mc -eq 1 ]; then
-	  [ $value -eq 5 ] && rm -f /data/data/leankernel/screen_off_maxfreq \
-		|| echo $FREQ > /data/data/leankernel/screen_off_maxfreq
-	  echo $FREQ > /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq
-	  echo "Done! (also will persist at boot)"
-	fi
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
 2)
 	echo -n "Enter 1 for stock dt2w, 2 for haptic dt2w, 3 for s2w, 4 for both, 0 to disable all (stock):"

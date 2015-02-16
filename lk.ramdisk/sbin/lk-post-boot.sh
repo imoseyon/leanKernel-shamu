@@ -140,3 +140,23 @@ SFILE="/sys/module/bcmdhd/parameters/wl_divide"
 CFILE="/data/data/leankernel/msm_hsic"
 SFILE="/sys/module/xhci_hcd/parameters/wl_divide"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+
+# cpu minfreq
+CFILE="/data/data/leankernel/minfreq"
+if [ -f $CFILE ]; then 
+	FREQ=`cat $CFILE`
+	echo $FREQ > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+	echo $FREQ > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+	echo $FREQ > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+	echo $FREQ > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+fi
+
+# cpu maxfreq
+CFILE="/data/data/leankernel/maxfreq"
+if [ -f $CFILE ]; then 
+	FREQ=`cat $CFILE`
+	echo $FREQ > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+	echo $FREQ > /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+	echo $FREQ > /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+	echo $FREQ > /sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+fi
