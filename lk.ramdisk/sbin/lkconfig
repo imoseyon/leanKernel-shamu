@@ -38,22 +38,24 @@ case $option in
 	echo -n "1) interactiveX screen off maxfreq: "
 	value=`cat /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq`
 	[ $value -gt 2600000 ] && echo "Disabled" || echo $value
-	echo -n "2) wake gestures (stock dt2w - haptic dt2w - s2w): "
 	sdt=`cat /sys/bus/i2c/devices/1-004a/tsp`
 	hdt=`cat /sys/android_touch/doubletap2wake`
 	s2w=`cat /sys/android_touch/sweep2wake`
-	echo "$sdt - $hdt - $s2w"
-	echo -n "3) wakelock (smb135x - sensor_ind): "
+	echo "2) wake gestures (OFF or 0 = disabled):"
+	echo "   stock dt2w: $sdt, haptic dt2w: $hdt, s2w: $s2w"
 	smb=`cat /sys/module/smb135x_charger/parameters/use_wlock`
 	si=`cat /sys/module/wakeup/parameters/enable_si_ws`
-	echo "$smb - $si (N = disabled)"
+	wr=`cat /sys/module/bcmdhd/parameters/wl_divide`
+	mh=`cat /sys/module/xhci_hcd/parameters/wl_divide`
+	echo "3) wakelock (Y/1 = enabled, N/0 = disabled, 2..X = divisor):"
+	echo "   smb135x: $smb, sensor_ind: $si, wlan_rx: $wr, msm_hsic: $mh"
 	echo -n "4) charging led: "
 	value=`cat /sys/class/leds/charging/trigger`
  	case "$value" in
 		*"[battery-charging]"*) echo "Enabled" ;;
 		*) echo "Disabled" ;;
 	esac
-	echo -n "5-6) rgb control (red green blue): "
+	echo -n "5/6) rgb control (red green blue): "
 	cat /sys/devices/platform/kcal_ctrl.0/kcal
 	echo -n "7) vibe strength: "
 	cat /sys/vibrator/pwmvalue
@@ -65,7 +67,7 @@ case $option in
 	cat /sys/fs/selinux/enforce
 	;;
 1)
-	echo -n "Enter a number between 0 and 5 (0:650mhz,1:883mhz,2:1.2ghz,3:1.5ghz,4:2.2ghz/stock,5:disable): "
+	echo -n "Enter a number between 0 and 5 (0:650mhz,1:883mhz,2:1.2ghz,3:1.5ghz,4:2.2ghz/default,5:disable/stock): "
 	read value
 	case $value in
 	  0) FREQ=652800;;
@@ -132,24 +134,80 @@ case $option in
 	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
 3)
-        echo -n "Wake sources: enter 0/1 to disable/enable smb135x, 2/3 to disable/enable sensor_ind:"
+        echo -n "Wake sources: enter 1 for smb135x, 2 for sensor_ind, 3 for wlan_rx, and 4 for msm_hsic:"
         read value
 	case $value in
-	  0)
-		echo N > /data/data/leankernel/smb135x_use_wlock
-		echo N > /sys/module/smb135x_charger/parameters/use_wlock
-		;;
 	  1)
-                rm -f /data/data/leankernel/smb135x_use_wlock
-                echo Y > /sys/module/smb135x_charger/parameters/use_wlock
+		echo -n "Enter 0 to disable, 1 to enable (stock) smb135x:"
+		read wval
+		case $wval in
+			0)
+			echo N > /data/data/leankernel/smb135x_use_wlock
+			echo N > /sys/module/smb135x_charger/parameters/use_wlock
+			;;
+			1)
+			rm -f /data/data/leankernel/smb135x_use_wlock
+			echo Y > /sys/module/smb135x_charger/parameters/use_wlock
+			;;
+			*) mc=0;;
+		esac
 		;;
 	  2)
-		echo N > /data/data/leankernel/sensor_ind
-		echo N > /sys/module/wakeup/parameters/enable_si_ws
+		echo -n "Enter 0 to disable, 1 to enable (stock) sensor_ind:"
+		read wval
+		case $wval in
+			0)
+			echo N > /data/data/leankernel/sensor_ind
+			echo N > /sys/module/wakeup/parameters/enable_si_ws
+			;;
+			1)
+			echo Y > /data/data/leankernel/sensor_ind
+			echo Y > /sys/module/wakeup/parameters/enable_si_ws
+			;;
+			*) mc=0;;
+		esac
 		;;
-	  3)
-		echo Y > /data/data/leankernel/sensor_ind
-		echo Y > /sys/module/wakeup/parameters/enable_si_ws
+	3)
+		echo -n "Enter 1 to 8 (1 = stock, higher = lower wake time) for wlan_rx:"
+		read wval
+		case $wval in
+			1)
+			rm -f /data/data/leankernel/wlan_rx
+			echo $wval > /sys/module/bcmdhd/parameters/wl_divide
+			;;
+			[2-8])
+			echo $wval > /data/data/leankernel/wlan_rx
+			echo $wval > /sys/module/bcmdhd/parameters/wl_divide
+			;;
+			*)
+			if [ $wval -gt 8 ]; then
+				echo $wval > /data/data/leankernel/wlan_rx
+				echo $wval > /sys/module/bcmdhd/parameters/wl_divide
+			else mc=0
+			fi
+			;;
+		esac
+		;;
+	4)
+		echo -n "Enter 0 to 8 (0 = disable, 1 = stock, higher = lower wake time) for msm_hsic:"
+		read wval
+		case $wval in
+			1)
+			rm -f /data/data/leankernel/msm_hsic
+			echo $wval > /sys/module/xhci_hcd/parameters/wl_divide
+			;;
+			0|[2-8])
+			echo $wval > /data/data/leankernel/msm_hsic
+			echo $wval > /sys/module/xhci_hcd/parameters/wl_divide
+			;;
+			*)
+			if [ $wval -gt 8 ]; then
+				echo $wval > /data/data/leankernel/msm_hsic
+				echo $wval > /sys/module/xhci_hcd/parameters/wl_divide
+			else mc=0
+			fi
+			;;
+		esac
 		;;
 	  *) mc=0;;
 	esac

@@ -130,3 +130,13 @@ fi
 CFILE="/data/data/leankernel/sc"
 SFILE="/sys/module/snd_soc_wcd9320/parameters/enable_fs"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+
+# wlan_rx wakelock
+CFILE="/data/data/leankernel/wlan_rx"
+SFILE="/sys/module/bcmdhd/parameters/wl_divide"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+
+# msm_hsic wakelock
+CFILE="/data/data/leankernel/msm_hsic"
+SFILE="/sys/module/xhci_hcd/parameters/wl_divide"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE
