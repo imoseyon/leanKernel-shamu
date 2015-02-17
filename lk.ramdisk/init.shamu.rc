@@ -46,9 +46,6 @@ on init
 
 on fs
     mount_all fstab.shamu
-    wait /dev/block/platform/msm_sdcc.1/by-name/cache
-    mount ext4 /dev/block/platform/msm_sdcc.1/by-name/cache /cache noatime nosuid nodev discard,nomblk_io_submit,noauto_da_alloc,errors=continue
-    mount f2fs /dev/block/platform/msm_sdcc.1/by-name/cache /cache noatime nosuid nodev discard,inline_xattr
     setprop ro.crypto.fuse_sdcard true
 
     # Keeping following partitions outside fstab file. As user may not have
