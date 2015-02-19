@@ -310,31 +310,12 @@ static int f2fs_set_meta_page_dirty(struct page *page)
 	return 0;
 }
 
-static void f2fs_invalidate_meta_page(struct page *page, unsigned long offset)
-{
-	struct inode *inode = page->mapping->host;
-
-	if (PageDirty(page))
-		dec_page_count(F2FS_I_SB(inode), F2FS_DIRTY_META);
-	ClearPagePrivate(page);
-}
-
-static int f2fs_release_meta_page(struct page *page, gfp_t wait)
-{
-	/* If this is dirty page, keep PagePrivate */
-	if (PageDirty(page))
-		return 0;
-
-	ClearPagePrivate(page);
-	return 1;
-}
-
 const struct address_space_operations f2fs_meta_aops = {
 	.writepage	= f2fs_write_meta_page,
 	.writepages	= f2fs_write_meta_pages,
 	.set_page_dirty	= f2fs_set_meta_page_dirty,
-	.invalidatepage = f2fs_invalidate_meta_page,
-	.releasepage	= f2fs_release_meta_page,
+	.invalidatepage = f2fs_invalidate_page,
+	.releasepage	= f2fs_release_page,
 };
 
 static void __add_ino_entry(struct f2fs_sb_info *sbi, nid_t ino, int type)
@@ -594,7 +575,7 @@ static struct page *validate_checkpoint(struct f2fs_sb_info *sbi,
 	if (crc_offset >= blk_size)
 		goto invalid_cp1;
 
-	crc = le32_to_cpu(*((__u32 *)((unsigned char *)cp_block + crc_offset)));
+	crc = le32_to_cpu(*((__le32 *)((unsigned char *)cp_block + crc_offset)));
 	if (!f2fs_crc_valid(crc, cp_block, crc_offset))
 		goto invalid_cp1;
 
@@ -609,7 +590,7 @@ static struct page *validate_checkpoint(struct f2fs_sb_info *sbi,
 	if (crc_offset >= blk_size)
 		goto invalid_cp2;
 
-	crc = le32_to_cpu(*((__u32 *)((unsigned char *)cp_block + crc_offset)));
+	crc = le32_to_cpu(*((__le32 *)((unsigned char *)cp_block + crc_offset)));
 	if (!f2fs_crc_valid(crc, cp_block, crc_offset))
 		goto invalid_cp2;
 
@@ -1001,15 +982,14 @@ static void do_checkpoint(struct f2fs_sb_info *sbi, struct cp_control *cpc)
 	/* write out checkpoint buffer at block 0 */
 	cp_page = grab_meta_page(sbi, start_blk++);
 	kaddr = page_address(cp_page);
-	memcpy(kaddr, ckpt, (1 << sbi->log_blocksize));
+	memcpy(kaddr, ckpt, F2FS_BLKSIZE);
 	set_page_dirty(cp_page);
 	f2fs_put_page(cp_page, 1);
 
 	for (i = 1; i < 1 + cp_payload_blks; i++) {
 		cp_page = grab_meta_page(sbi, start_blk++);
 		kaddr = page_address(cp_page);
-		memcpy(kaddr, (char *)ckpt + i * F2FS_BLKSIZE,
-				(1 << sbi->log_blocksize));
+		memcpy(kaddr, (char *)ckpt + i * F2FS_BLKSIZE, F2FS_BLKSIZE);
 		set_page_dirty(cp_page);
 		f2fs_put_page(cp_page, 1);
 	}
@@ -1029,7 +1009,7 @@ static void do_checkpoint(struct f2fs_sb_info *sbi, struct cp_control *cpc)
 	/* writeout checkpoint block */
 	cp_page = grab_meta_page(sbi, start_blk);
 	kaddr = page_address(cp_page);
-	memcpy(kaddr, ckpt, (1 << sbi->log_blocksize));
+	memcpy(kaddr, ckpt, F2FS_BLKSIZE);
 	set_page_dirty(cp_page);
 	f2fs_put_page(cp_page, 1);
 
