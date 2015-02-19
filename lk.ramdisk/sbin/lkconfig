@@ -5,6 +5,8 @@ detectsu=`ls /data/data`
 
 minfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq`
 maxfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq`
+f1="/sys/devices/system/cpu/cpu"
+f2="/cpufreq/scaling_min_freq"
 
 while true; do
 mc=1
@@ -92,10 +94,10 @@ case $option in
 		esac
 		if [ $mc -eq 1 ]; then
 		  echo $FREQ > /data/data/leankernel/minfreq
-		  echo $FREQ > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-		  echo $FREQ > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq 2> /dev/null
-		  echo $FREQ > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq 2> /dev/null
-		  echo $FREQ > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq 2> /dev/null
+		  echo $FREQ > ${f1}0${f2}
+		  for i in 1 2 3; do
+			[ -f $f1$i$f2 ] && echo $FREQ > $f1$i$f2
+		  done
 		fi
 		;;
 	  2) 
@@ -111,10 +113,10 @@ case $option in
 		esac
 		if [ $mc -eq 1 ]; then
 		  echo $FREQ > /data/data/leankernel/maxfreq
-		  echo $FREQ > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-		  echo $FREQ > /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq 2> /dev/null
-		  echo $FREQ > /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq 2> /dev/null
-		  echo $FREQ > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq 2> /dev/null
+		  echo $FREQ > ${f1}0${f2}
+		  for i in 1 2 3; do
+			[ -f $f1$i$f2 ] && echo $FREQ > $f1$i$f2
+		  done
 		fi
 		;;
 	  3)
@@ -291,7 +293,6 @@ case $option in
 	if [ -n "$value" ]; then
 		echo "$value" > /data/data/leankernel/kcal
 		echo "$value" > /sys/devices/platform/kcal_ctrl.0/kcal
-		echo 1 > /sys/devices/platform/kcal_ctrl.0/kcal_ctrl
 	else mc=0
 	fi
 	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
@@ -308,7 +309,6 @@ case $option in
 	if [ $mc -eq 1 ]; then
 	  [ $value -eq 3 ] && rm -f /data/data/leankernel/kcal || echo "$RGB" > /data/data/leankernel/kcal
 	  echo "$RGB" > /sys/devices/platform/kcal_ctrl.0/kcal
-	  echo 1 > /sys/devices/platform/kcal_ctrl.0/kcal_ctrl
 	  echo "Done! (also will persist at boot)"
 	fi
 	;;
