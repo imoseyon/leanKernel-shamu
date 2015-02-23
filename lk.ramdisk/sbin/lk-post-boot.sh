@@ -19,7 +19,8 @@ chmod 444 /dev/frandom
 	"allow system_server resourcecache_data_file file { open read write getattr add_name setattr create remove_name unlink link }" \
 	"allow system_server dex2oat_exec file rx_file_perms" \
 	"allow mediaserver mediaserver_tmpfs file execute" \
-	"allow drmserver theme_data_file file r_file_perms"
+	"allow drmserver theme_data_file file r_file_perms" \
+	"allow debuggerd app_data_file dir search"
 
 # take a little more RAM from file/dir caches and give them to apps 
 echo 200 > /proc/sys/vm/vfs_cache_pressure
