@@ -7,6 +7,7 @@ minfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq`
 maxfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq`
 f1="/sys/devices/system/cpu/cpu"
 f2="/cpufreq/scaling_min_freq"
+lkdata="/data/data/leankernel"
 
 while true; do
 mc=1
@@ -20,8 +21,8 @@ echo "1) cpu frequency control"
 echo "2) wake gesture control"
 echo "3) wakelock control"
 echo "4) charging led"
-echo "5) rgb control (advanced)"
-echo "6) rgb control (simple)"
+echo "5) rgb/picture control (advanced)"
+echo "6) rgb/picture control (simple)"
 echo "7) vibe strength"
 echo "8) power saving mode for cpu scheduler"
 echo "9) faux sound control"
@@ -42,10 +43,10 @@ case $option in
 	echo "----------------"
 	smax=`cat /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq`
 	[ $smax -gt 2600000 ] && smax="Disabled"
-	cmffile="/data/data/leankernel/minfreq"
+	cmffile="$lkdata/minfreq"
 	[ -f $cmffile ] && cminfreq=`cat $cmffile` \
 		|| cminfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq`
-	cmffile="/data/data/leankernel/maxfreq"
+	cmffile="$lkdata/maxfreq"
 	[ -f $cmffile ] && cmaxfreq=`cat $cmffile` \
 		|| cmaxfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq`
 	echo "1) cpu min freq: $cminfreq, max freq: $cmaxfreq, interactiveX screenoff max: $smax "
@@ -66,8 +67,13 @@ case $option in
 		*"[battery-charging]"*) echo "Enabled" ;;
 		*) echo "Disabled" ;;
 	esac
-	echo -n "5) rgb control (red green blue): "
-	cat /sys/devices/platform/kcal_ctrl.0/kcal
+	echo "5) rgb/picture control: "
+	rgb=`cat /sys/devices/platform/kcal_ctrl.0/kcal`
+	sat=`cat /sys/devices/platform/kcal_ctrl.0/kcal_sat`
+	cont=`cat /sys/devices/platform/kcal_ctrl.0/kcal_cont`
+	hue=`cat /sys/devices/platform/kcal_ctrl.0/kcal_hue`
+	gamma=`cat /sys/devices/platform/kcal_ctrl.0/kcal_val`
+	echo "   rgb: $rgb, sat: $sat, cont: $cont, hue: $hue, gamma: $gamma"
 	echo -n "7) vibe strength: "
 	cat /sys/vibrator/pwmvalue
 	echo -n "8) cpu scheduler power saving mode: "
@@ -93,7 +99,7 @@ case $option in
 		  *) mc=0;;
 		esac
 		if [ $mc -eq 1 ]; then
-		  echo $FREQ > /data/data/leankernel/minfreq
+		  echo $FREQ > $lkdata/minfreq
 		  echo $FREQ > ${f1}0${f2}
 		  for i in 1 2 3; do
 			[ -f $f1$i$f2 ] && echo $FREQ > $f1$i$f2
@@ -112,7 +118,7 @@ case $option in
 		  *) mc=0;;
 		esac
 		if [ $mc -eq 1 ]; then
-		  echo $FREQ > /data/data/leankernel/maxfreq
+		  echo $FREQ > $lkdata/maxfreq
 		  echo $FREQ > ${f1}0${f2}
 		  for i in 1 2 3; do
 			[ -f $f1$i$f2 ] && echo $FREQ > $f1$i$f2
@@ -132,8 +138,8 @@ case $option in
 		  *) mc=0;;
 		esac
 		if [ $mc -eq 1 ]; then
-		  [ $value -eq 5 ] && rm -f /data/data/leankernel/screen_off_maxfreq \
-			|| echo $FREQ > /data/data/leankernel/screen_off_maxfreq
+		  [ $value -eq 5 ] && rm -f $lkdata/screen_off_maxfreq \
+			|| echo $FREQ > $lkdata/screen_off_maxfreq
 		  echo $FREQ > /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq
 		  echo "Done! (also will persist at boot)"
 		fi
@@ -148,43 +154,43 @@ case $option in
 	case $value in
 	  1)
 		echo 0 > /sys/android_touch/doubletap2wake
-		rm -f /data/data/leankernel/doubletap2wake
+		rm -f $lkdata/doubletap2wake
 		echo 0 > /sys/android_touch/sweep2wake
-		rm -f /data/data/leankernel/sweep2wake
+		rm -f $lkdata/sweep2wake
 		echo AUTO > /sys/bus/i2c/devices/1-004a/tsp
-		echo AUTO > /data/data/leankernel/tsp
+		echo AUTO > $lkdata/tsp
 		;;
 	  2)
 		echo OFF > /sys/bus/i2c/devices/1-004a/tsp
-		rm -f /data/data/leankernel/tsp
+		rm -f $lkdata/tsp
 		echo 0 > /sys/android_touch/sweep2wake
-		rm -f /data/data/leankernel/sweep2wake
+		rm -f $lkdata/sweep2wake
 		echo 1 > /sys/android_touch/doubletap2wake
-		echo 1 > /data/data/leankernel/doubletap2wake
+		echo 1 > $lkdata/doubletap2wake
 		;;
 	  3)
 		echo OFF > /sys/bus/i2c/devices/1-004a/tsp
-		rm -f /data/data/leankernel/tsp
+		rm -f $lkdata/tsp
 		echo 0 > /sys/android_touch/doubletap2wake
-		rm -f /data/data/leankernel/doubletap2wake
+		rm -f $lkdata/doubletap2wake
 		echo 15 > /sys/android_touch/sweep2wake
-		echo 15 > /data/data/leankernel/sweep2wake
+		echo 15 > $lkdata/sweep2wake
 		;;
 	  4)
 		echo OFF > /sys/bus/i2c/devices/1-004a/tsp
-		rm -f /data/data/leankernel/tsp
+		rm -f $lkdata/tsp
 		echo 1 > /sys/android_touch/doubletap2wake
-		echo 1 > /data/data/leankernel/doubletap2wake
+		echo 1 > $lkdata/doubletap2wake
 		echo 15 > /sys/android_touch/sweep2wake
-		echo 15 > /data/data/leankernel/sweep2wake
+		echo 15 > $lkdata/sweep2wake
 		;;
 	  0)
 		echo OFF > /sys/bus/i2c/devices/1-004a/tsp
-		rm -f /data/data/leankernel/tsp
+		rm -f $lkdata/tsp
 		echo 0 > /sys/android_touch/sweep2wake
-		rm -f /data/data/leankernel/sweep2wake
+		rm -f $lkdata/sweep2wake
 		echo 0 > /sys/android_touch/doubletap2wake
-		rm -f /data/data/leankernel/doubletap2wake
+		rm -f $lkdata/doubletap2wake
 		;;
 	  *) mc=0;;
 	esac
@@ -199,11 +205,11 @@ case $option in
 		read wval
 		case $wval in
 			0)
-			echo N > /data/data/leankernel/smb135x_use_wlock
+			echo N > $lkdata/smb135x_use_wlock
 			echo N > /sys/module/smb135x_charger/parameters/use_wlock
 			;;
 			1)
-			rm -f /data/data/leankernel/smb135x_use_wlock
+			rm -f $lkdata/smb135x_use_wlock
 			echo Y > /sys/module/smb135x_charger/parameters/use_wlock
 			;;
 			*) mc=0;;
@@ -214,11 +220,11 @@ case $option in
 		read wval
 		case $wval in
 			0)
-			echo N > /data/data/leankernel/sensor_ind
+			echo N > $lkdata/sensor_ind
 			echo N > /sys/module/wakeup/parameters/enable_si_ws
 			;;
 			1)
-			echo Y > /data/data/leankernel/sensor_ind
+			echo Y > $lkdata/sensor_ind
 			echo Y > /sys/module/wakeup/parameters/enable_si_ws
 			;;
 			*) mc=0;;
@@ -229,16 +235,16 @@ case $option in
 		read wval
 		case $wval in
 			1)
-			rm -f /data/data/leankernel/wlan_rx
+			rm -f $lkdata/wlan_rx
 			echo $wval > /sys/module/bcmdhd/parameters/wl_divide
 			;;
 			[2-8])
-			echo $wval > /data/data/leankernel/wlan_rx
+			echo $wval > $lkdata/wlan_rx
 			echo $wval > /sys/module/bcmdhd/parameters/wl_divide
 			;;
 			*)
 			if [ $wval -gt 8 ]; then
-				echo $wval > /data/data/leankernel/wlan_rx
+				echo $wval > $lkdata/wlan_rx
 				echo $wval > /sys/module/bcmdhd/parameters/wl_divide
 			else mc=0
 			fi
@@ -250,16 +256,16 @@ case $option in
 		read wval
 		case $wval in
 			1)
-			rm -f /data/data/leankernel/msm_hsic
+			rm -f $lkdata/msm_hsic
 			echo $wval > /sys/module/xhci_hcd/parameters/wl_divide
 			;;
 			0|[2-8])
-			echo $wval > /data/data/leankernel/msm_hsic
+			echo $wval > $lkdata/msm_hsic
 			echo $wval > /sys/module/xhci_hcd/parameters/wl_divide
 			;;
 			*)
 			if [ $wval -gt 8 ]; then
-				echo $wval > /data/data/leankernel/msm_hsic
+				echo $wval > $lkdata/msm_hsic
 				echo $wval > /sys/module/xhci_hcd/parameters/wl_divide
 			else mc=0
 			fi
@@ -275,12 +281,12 @@ case $option in
         read value
 	case $value in
 	  Y|y)
-        	echo battery-charging > /data/data/leankernel/charging_led
+		echo battery-charging > $lkdata/charging_led
 		echo battery-charging > /sys/class/leds/charging/trigger
 		echo 1 > /sys/class/leds/charging/max_brightness
 		;;
 	  N|n)
-        	rm -f /data/data/leankernel/charging_led
+		rm -f $lkdata/charging_led
 		echo none > /sys/class/leds/charging/trigger
 		;;
 	  *) mc=0;;
@@ -288,27 +294,68 @@ case $option in
 	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
 5)
-        echo -n "Enter three values (red, green, blue) between 0-255 (default is 255 255 255):"
-        read value
-	if [ -n "$value" ]; then
-		echo "$value" > /data/data/leankernel/kcal
-		echo "$value" > /sys/devices/platform/kcal_ctrl.0/kcal
-	else mc=0
+        echo -n "Enter three values (red, green, blue) between 0-255 (default 255 255 255, enter to skip):"
+	mc=0
+        read RGB
+	if [ -n "$RGB" ]; then
+		echo "$RGB" > $lkdata/kcal
+		echo "$RGB" > /sys/devices/platform/kcal_ctrl.0/kcal
+		mc=1
+	fi
+	echo -n "Enter between 224-383 for saturation (default 255, enter to skip):"
+        read SAT
+	if [ -n "$SAT" ]; then
+		echo "$SAT" > $lkdata/kcal_sat
+		echo "$SAT" > /sys/devices/platform/kcal_ctrl.0/kcal_sat
+		mc=1
+	fi
+	echo -n "Enter between 128-383 for contrast (default 255, enter to skip):"
+        read CONT
+	if [ -n "$CONT" ]; then
+		echo "$CONT" > $lkdata/kcal_cont
+		echo "$CONT" > /sys/devices/platform/kcal_ctrl.0/kcal_cont
+		mc=1
+	fi
+	echo -n "Enter between 0-1536 for hue (default 0, enter to skip):"
+        read HUE
+	if [ -n "$HUE" ]; then
+		echo "$HUE" > $lkdata/kcal_hue
+		echo "$HUE" > /sys/devices/platform/kcal_ctrl.0/kcal_hue
+		mc=1
+	fi
+	echo -n "Enter between 128-383 for gamma (default 255, enter to skip):"
+        read GAMMA
+	if [ -n "$GAMMA" ]; then
+		echo "$GAMMA" > $lkdata/kcal_val
+		echo "$GAMMA" > /sys/devices/platform/kcal_ctrl.0/kcal_val
+		mc=1
 	fi
 	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
 6)
-        echo -n "Enter 1 for reference(6500k), 2 for cool(7400k), 3 for stock(6250k):"
+        echo -n "Enter 1 for reference(6500k), 2 for cool(7500k), 3 for stock(6250k):"
         read value
 	case $value in
-	  1) RGB="248 246 255";;
-	  2) RGB="237 235 255";;
-	  3) RGB="255 255 255";;
+	  1) RGB="250 250 255";SAT=243;CONT=255;HUE=1515;GAMMA=250;;
+	  2) RGB="232 228 255";SAT=249;CONT=255;HUE=1515;GAMMA=253;;
+	  3) RGB="255 255 255";SAT=255;CONT=255;HUE=0;GAMMA=255;;
 	  *) mc=0;;
 	esac
 	if [ $mc -eq 1 ]; then
-	  [ $value -eq 3 ] && rm -f /data/data/leankernel/kcal || echo "$RGB" > /data/data/leankernel/kcal
+	  if [ $value -eq 3 ]; then
+		rm -f $lkdata/kcal*
+	  else
+		echo "$RGB" > $lkdata/kcal
+		echo "$SAT" > $lkdata/kcal_sat
+		echo "$CONT" > $lkdata/kcal_cont
+		echo "$HUE" > $lkdata/kcal_hue
+		echo "$GAMMA" > $lkdata/kcal_val
+	  fi
 	  echo "$RGB" > /sys/devices/platform/kcal_ctrl.0/kcal
+	  echo "$SAT" > /sys/devices/platform/kcal_ctrl.0/kcal_sat
+	  echo "$CONT" > /sys/devices/platform/kcal_ctrl.0/kcal_cont
+	  echo "$HUE" > /sys/devices/platform/kcal_ctrl.0/kcal_hue
+	  echo "$GAMMA" > /sys/devices/platform/kcal_ctrl.0/kcal_val
 	  echo "Done! (also will persist at boot)"
 	fi
 	;;
@@ -316,12 +363,12 @@ case $option in
         read value
 	case $value in
 	  127)
-		rm -f /data/data/leankernel/pwmvalue
+		rm -f $lkdata/pwmvalue
 		echo 127 > /sys/vibrator/pwmvalue
 		;;
 	  *)
 		if [ -n "$value" ] && [ $value -lt 127 ] && [ $value -ge 0 ]; then
-		  echo "$value" > /data/data/leankernel/pwmvalue
+		  echo "$value" > $lkdata/pwmvalue
 		  echo "$value" > /sys/vibrator/pwmvalue
 		else mc=0
 		fi
@@ -334,11 +381,11 @@ case $option in
         read value
 	case $value in
 	  0)
-                rm -f /data/data/leankernel/current_sched_balance_policy
+                rm -f $lkdata/current_sched_balance_policy
                 echo performance > /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
 		;;
 	  1)
-		echo powersaving > /data/data/leankernel/current_sched_balance_policy
+		echo powersaving > $lkdata/current_sched_balance_policy
 		echo powersaving > /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy
 		;;
 	  *) mc=0;;
@@ -350,11 +397,11 @@ case $option in
         read value
 	case $value in
 	  n|N)
-                rm -f /data/data/leankernel/sc
+                rm -f $lkdata/sc
                 echo N > /sys/module/snd_soc_wcd9320/parameters/enable_fs
 		;;
 	  y|Y)
-		echo Y > /data/data/leankernel/sc
+		echo Y > $lkdata/sc
 		echo Y > /sys/module/snd_soc_wcd9320/parameters/enable_fs
 		;;
 	  *) mc=0;;
@@ -366,11 +413,11 @@ case $option in
 	read value
 	case $value in
 	  1)
-		rm -f /data/data/leankernel/selinux_permissive
+		rm -f $lkdata/selinux_permissive
 		echo 1 > /sys/fs/selinux/enforce
 		;;
 	  0)
-		touch /data/data/leankernel/selinux_permissive
+		touch $lkdata/selinux_permissive
 		echo 0 > /sys/fs/selinux/enforce
 		;;
 	  *) mc=0;;

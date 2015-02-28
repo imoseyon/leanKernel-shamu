@@ -56,10 +56,18 @@ CFILE="/data/data/leankernel/charging_led"
 SFILE="/sys/class/leds/charging"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE/trigger && echo 1 > $SFILE/max_brightness
 
-# rgb control
+# rgb/picture control
+SFILE="/sys/devices/platform/kcal_ctrl.0/kcal"
 CFILE="/data/data/leankernel/kcal"
-SFILE="/sys/devices/platform/kcal_ctrl.0"
-[ -f $CFILE ] && echo `cat $CFILE` > $SFILE/kcal && echo 1 > $SFILE/kcal_ctrl
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+CFILE="/data/data/leankernel/kcal_sat"
+[ -f $CFILE ] && echo `cat $CFILE` > ${SFILE}_sat
+CFILE="/data/data/leankernel/kcal_cont"
+[ -f $CFILE ] && echo `cat $CFILE` > ${SFILE}_cont
+CFILE="/data/data/leankernel/kcal_hue"
+[ -f $CFILE ] && echo `cat $CFILE` > ${SFILE}_hue
+CFILE="/data/data/leankernel/kcal_val"
+[ -f $CFILE ] && echo `cat $CFILE` > ${SFILE}_val
 
 # wake gesture control
 CFILE="/data/data/leankernel/tsp"
