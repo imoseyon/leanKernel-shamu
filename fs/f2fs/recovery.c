@@ -212,8 +212,10 @@ static int find_fsync_dnodes(struct f2fs_sb_info *sbi, struct list_head *head)
 			if (IS_ERR(entry->inode)) {
 				err = PTR_ERR(entry->inode);
 				kmem_cache_free(fsync_entry_slab, entry);
-				if (err == -ENOENT)
+				if (err == -ENOENT) {
+					err = 0;
 					goto next;
+				}
 				break;
 			}
 			list_add_tail(&entry->list, head);
@@ -401,14 +403,12 @@ static int do_recover_data(struct f2fs_sb_info *sbi, struct inode *inode,
 			/* write dummy data page */
 			recover_data_page(sbi, NULL, &sum, src, dest);
 			dn.data_blkaddr = dest;
-			update_extent_cache(&dn);
+			f2fs_update_extent_cache(&dn);
 			recovered++;
 		}
 		dn.ofs_in_node++;
 	}
 
-	/* write node page in place */
-	set_summary(&sum, dn.nid, 0, 0);
 	if (IS_INODE(dn.node_page))
 		sync_inode_page(&dn);
 
