@@ -240,6 +240,8 @@ go_write:
 		 * will be used only for fsynced inodes after checkpoint.
 		 */
 		try_to_fix_pino(inode);
+		clear_inode_flag(fi, FI_APPEND_WRITE);
+		clear_inode_flag(fi, FI_UPDATE_WRITE);
 		goto out;
 	}
 sync_nodes:
@@ -447,7 +449,7 @@ int truncate_data_blocks_range(struct dnode_of_data *dn, int count)
 			continue;
 
 		dn->data_blkaddr = NULL_ADDR;
-		update_extent_cache(dn);
+		f2fs_update_extent_cache(dn);
 		invalidate_blocks(sbi, blkaddr);
 		nr_free++;
 	}
