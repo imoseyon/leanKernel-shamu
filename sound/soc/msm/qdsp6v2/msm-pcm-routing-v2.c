@@ -781,10 +781,8 @@ static void msm_pcm_routing_process_audio(u16 reg, u16 val, int set)
 
 #ifdef CONFIG_WAKE_GESTURES
 	if (msm_bedais[reg].active) {
-		if (!disable_s2w) {
-			disable_s2w = true;
-			pr_info("%s: wake gestures disabled\n", __func__);
-		}
+		disable_s2w = true;
+		pr_info("%s: wake gestures disabled\n", __func__);
 		callend = false;
 	} else if (disable_s2w) {
 		if (!callend) callend = true;
