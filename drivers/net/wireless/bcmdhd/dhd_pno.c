@@ -1300,10 +1300,9 @@ exit_no_clear:
 	/* clear mode in case of error */
 	if (err < 0) {
 		int ret = dhd_pno_clean(dhd);
-
 		if (ret < 0) {
-			DHD_ERROR(("%s : dhd_pno_clean failure (err: %d)\n",
-				__FUNCTION__, ret));
+			 DHD_ERROR(("%s : failed to call dhd_pno_clean (err: %d)\n",
+			 	__FUNCTION__, ret));
 		} else {
 			_pno_state->pno_mode &= ~DHD_PNO_LEGACY_MODE;
 		}
@@ -2112,7 +2111,6 @@ exit:
 	/* clear mode in case of error */
 	if (err < 0) {
 		int ret = dhd_pno_clean(dhd);
-
 		if (ret < 0) {
 			 DHD_ERROR(("%s : failed to call dhd_pno_clean (err: %d)\n",
 			 	__FUNCTION__, ret));

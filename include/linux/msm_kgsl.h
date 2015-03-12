@@ -70,19 +70,19 @@ struct kgsl_pwrlevel {
 /**
  * struct kgsl_device_platform_data - Struct holding all the device info
  * obtained from the dtsi file
- * @pwrlevel:		Array of struct holding pwrlevel information
- * @init_level:		Pwrlevel device is initialized with
- * @num_levels:		Number of pwrlevels for the specific device
- * @idle_timeout:	Timeout for GPU to turn its resources off
- * @strtstp_sleepwake:  Flag to decide b/w SLEEP and SLUMBER
- * @bus_control:	Flag if independent bus voting is supported
- * @clk_map:		Clocks map per platform
- * @bus_scale_table:	Bus table with different b/w votes
- * @iommu_data:		Struct holding iommu context data
- * @iommu_count:	Number of IOMMU units for the GPU
- * @csdev:		Pointer to the coresight device for this device
- * @coresight_pdata:	Coresight configuration for specific device
- * @chipid:		Chip ID for the device's GPU
+ * @pwrlevel:			Array of struct holding pwrlevel information
+ * @init_level:			Pwrlevel device is initialized with
+ * @num_levels:			Number of pwrlevels for the specific device
+ * @idle_timeout:		Timeout for GPU to turn its resources off
+ * @strtstp_sleepwake:		Flag to decide b/w SLEEP and SLUMBER
+ * @bus_control:		Flag if independent bus voting is supported
+ * @clk_map:			Clocks map per platform
+ * @bus_scale_table:		Bus table with different b/w votes
+ * @iommu_data:			Struct holding iommu context data
+ * @iommu_count:		Number of IOMMU units for the GPU
+ * @csdev:			Pointer to the coresight device for this device
+ * @coresight_pdata:		Coresight configuration for specific device
+ * @chipid:			Chip ID for the device's GPU
  * @pm_qos_active_latency:	GPU PM QoS latency request for active state
  * @pm_qos_wakeup_latency:	GPU PM QoS latency request during wakeup
  */

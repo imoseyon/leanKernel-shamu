@@ -543,6 +543,40 @@ static ssize_t kgsl_pwrctrl_pmqos_active_latency_show(struct device *dev,
 		device->pwrctrl.pm_qos_active_latency);
 }
 
+
+static ssize_t kgsl_pwrctrl_pmqos_wakeup_latency_store(struct device *dev,
+						struct device_attribute *attr,
+						const char *buf, size_t count)
+{
+	unsigned int val = 0;
+	struct kgsl_device *device = kgsl_device_from_dev(dev);
+	int ret;
+
+	if (device == NULL)
+		return 0;
+
+	ret = kgsl_sysfs_store(buf, &val);
+	if (ret)
+		return ret;
+
+	kgsl_mutex_lock(&device->mutex, &device->mutex_owner);
+	device->pwrctrl.pm_qos_wakeup_latency = val;
+	kgsl_mutex_unlock(&device->mutex, &device->mutex_owner);
+
+	return count;
+}
+
+static ssize_t kgsl_pwrctrl_pmqos_wakeup_latency_show(struct device *dev,
+						struct device_attribute *attr,
+						char *buf)
+{
+	struct kgsl_device *device = kgsl_device_from_dev(dev);
+	if (device == NULL)
+		return 0;
+	return snprintf(buf, PAGE_SIZE, "%d\n",
+		device->pwrctrl.pm_qos_wakeup_latency);
+}
+
 static ssize_t kgsl_pwrctrl_gpubusy_show(struct device *dev,
 					struct device_attribute *attr,
 					char *buf)
@@ -823,6 +857,9 @@ static DEVICE_ATTR(num_pwrlevels, 0444,
 static DEVICE_ATTR(pmqos_active_latency, 0644,
 	kgsl_pwrctrl_pmqos_active_latency_show,
 	kgsl_pwrctrl_pmqos_active_latency_store);
+static DEVICE_ATTR(pmqos_wakeup_latency, 0644,
+	kgsl_pwrctrl_pmqos_wakeup_latency_show,
+	kgsl_pwrctrl_pmqos_wakeup_latency_store);
 static DEVICE_ATTR(reset_count, 0444,
 	kgsl_pwrctrl_reset_count_show,
 	NULL);
@@ -854,6 +891,7 @@ static const struct device_attribute *pwrctrl_attr_list[] = {
 	&dev_attr_thermal_pwrlevel,
 	&dev_attr_num_pwrlevels,
 	&dev_attr_pmqos_active_latency,
+	&dev_attr_pmqos_wakeup_latency,
 	&dev_attr_reset_count,
 	&dev_attr_force_clk_on,
 	&dev_attr_force_bus_on,
