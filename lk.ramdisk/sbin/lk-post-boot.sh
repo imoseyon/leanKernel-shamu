@@ -22,9 +22,6 @@ chmod 444 /dev/frandom
 	"allow drmserver theme_data_file file r_file_perms" \
 	"allow debuggerd app_data_file dir search"
 
-# take a little more RAM from file/dir caches and give them to apps 
-echo 200 > /proc/sys/vm/vfs_cache_pressure
-
 # for lkconfig
 [ ! -d "/data/data/leankernel" ] && mkdir /data/data/leankernel
 chmod 755 /data/data/leankernel
