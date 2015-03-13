@@ -493,8 +493,8 @@ service console /system/bin/sh
     group shell log
     seclabel u:r:shell:s0
 
-on property:ro.debuggable=1
-    start console
+#on property:ro.debuggable=1
+#    start console
 
 # adbd is controlled via property triggers in init.<platform>.usb.rc
 service adbd /sbin/adbd --root_seclabel=u:r:su:s0
@@ -592,7 +592,7 @@ service installd /system/bin/installd
 
 service flash_recovery /system/bin/install-recovery.sh
     class main
-    seclabel u:r:install_recovery:s0
+#    seclabel u:r:install_recovery:s0
     oneshot
 
 service racoon /system/bin/racoon

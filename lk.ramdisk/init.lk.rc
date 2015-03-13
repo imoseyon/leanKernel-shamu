@@ -1,6 +1,7 @@
 
 service supolicy /sbin/supolicy --live \
 	"allow sensors diag_device chr_file { read write open ioctl }" \
+	"allow sensors sensors capability net_raw" \
 	"allow init kernel security setenforce"
      disabled
      oneshot
