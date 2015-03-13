@@ -84,7 +84,6 @@ phone2                                    u:object_r:radio_service:s0
 phone                                     u:object_r:radio_service:s0
 power                                     u:object_r:system_server_service:s0
 print                                     u:object_r:system_server_service:s0
-profile                                   u:object_r:system_server_service:s0
 procstats                                 u:object_r:system_server_service:s0
 radio.phonesubinfo                        u:object_r:radio_service:s0
 radio.phone                               u:object_r:radio_service:s0
@@ -104,7 +103,7 @@ sip                                       u:object_r:radio_service:s0
 statusbar                                 u:object_r:system_server_service:s0
 SurfaceFlinger                            u:object_r:surfaceflinger_service:s0
 task                                      u:object_r:system_server_service:s0
-telecom                                   u:object_r:radio_service:s0
+telecom                                   u:object_r:system_server_service:s0
 telephony.registry                        u:object_r:system_server_service:s0
 textservices                              u:object_r:system_server_service:s0
 trust                                     u:object_r:system_server_service:s0
@@ -126,7 +125,4 @@ window                                    u:object_r:system_server_service:s0
 *                                         u:object_r:default_android_service:s0
 #line 1 "device/moto/shamu/sepolicy/service_contexts"
 rcs                                       u:object_r:radio_service:s0
-#line 1 "vendor/cm/sepolicy/service_contexts"
-edgegestureservice                        u:object_r:system_server_service:s0
-themes                                    u:object_r:system_server_service:s0
-torch                                     u:object_r:system_server_service:s0
+AtCmdFwd                                  u:object_r:atfwd_service:s0

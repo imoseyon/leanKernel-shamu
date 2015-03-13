@@ -112,8 +112,6 @@
 /dev/uinput		u:object_r:uhid_device:s0
 /dev/uio[0-9]*		u:object_r:uio_device:s0
 /dev/urandom		u:object_r:urandom_device:s0
-/dev/erandom		u:object_r:urandom_device:s0
-/dev/frandom		u:object_r:random_device:s0
 /dev/usb_accessory	u:object_r:usbaccessory_device:s0
 /dev/vcs[0-9a-z]*	u:object_r:vcs_device:s0
 /dev/video[0-9]*	u:object_r:video_device:s0
@@ -186,6 +184,7 @@
 /data/resource-cache(/.*)? u:object_r:resourcecache_data_file:s0
 /data/dalvik-cache(/.*)? u:object_r:dalvikcache_data_file:s0
 /data/dalvik-cache/profiles(/.*)? u:object_r:dalvikcache_profiles_data_file:s0
+/data/adb(/.*)?		u:object_r:adb_data_file:s0
 /data/anr(/.*)?		u:object_r:anr_data_file:s0
 /data/app(/.*)?                       u:object_r:apk_data_file:s0
 /data/app/vmdl.*\.tmp(/.*)?           u:object_r:apk_tmp_file:s0
@@ -220,6 +219,9 @@
 /data/misc/wifi/sockets/wpa_ctrl.*   u:object_r:system_wpa_socket:s0
 /data/misc/wifi/hostapd(/.*)?   u:object_r:wpa_socket:s0
 /data/misc/zoneinfo(/.*)?       u:object_r:zoneinfo_data_file:s0
+
+# coredump directory for userdebug/eng devices
+/cores(/.*)?                    u:object_r:coredump_file:s0
 
 # Wallpaper file for other users
 /data/system/users/[0-9]+/wallpaper		u:object_r:wallpaper_file:s0
@@ -304,6 +306,7 @@
 
 # tee devices
 /dev/block/mmcblk0rpmb          u:object_r:drm_block_device:s0
+/dev/block/mmcblk0p34           u:object_r:drm_block_device:s0
 
 # Used by keystore to access trustzone
 /dev/qseecom                   u:object_r:tee_device:s0
@@ -329,6 +332,10 @@
 /dev/socket/adspdsock           u:object_r:adspd_socket:s0
 /dev/socket/sensor_ctl_socket   u:object_r:sensors_socket:s0
 /dev/socket/mpdecision(/.*)?    u:object_r:mpdecision_socket:s0
+
+#Add context for IMS Socket node
+/dev/socket/ims_qmid            u:object_r:ims_socket:s0
+/dev/socket/ims_datad           u:object_r:ims_socket:s0
 
 # Shared memory log
 /dev/smem_log                   u:object_r:shared_log_device:s0
@@ -381,6 +388,7 @@
 /system/bin/thermal-engine      u:object_r:thermald_exec:s0
 /system/bin/time_daemon         u:object_r:time_exec:s0
 /system/bin/tcmd_mini           u:object_r:tcmd_exec:s0
+/system/bin/ATFWD-daemon        u:object_r:atfwd_exec:s0
 
 # Bluetooth
 /sys/class/rfkill/rfkill0/state u:object_r:sysfs_bluetooth_writable:s0
@@ -403,18 +411,5 @@
 /sys/devices/cycapsense_prog.1/cycapsense_fw             u:object_r:sysfs_capsense_update:s0
 /sys/devices/mmi_sar_ctrl.[0-9]*/sar_wifi                u:object_r:sysfs_sar_wifi:s0
 
-# Themes
-/data/system/theme(/.*)?  u:object_r:theme_data_file:s0
-
-/system/bin/sysinit       u:object_r:sysinit_exec:s0
-
-/system/etc/init.d/90userinit           u:object_r:userinit_exec:s0
-
-# Superuser's control sockets
-/dev/socket/su-daemon(/.*)?   u:object_r:superuser_device:s0
-
-# Expansion of these hooks is a bit unconventional
-/cache/com.cyanogenmod.keyhandler.dex   u:object_r:dalvikcache_data_file:s0
-
-# Lockscreen wallpaper
-/data/system/users/[0-9]+/keyguard_wallpaper   u:object_r:wallpaper_file:s0
+/system/bin/imsdatadaemon                       u:object_r:ims_exec:s0
+/system/bin/imsqmidaemon                        u:object_r:ims_exec:s0
