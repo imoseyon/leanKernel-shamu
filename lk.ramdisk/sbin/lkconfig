@@ -28,7 +28,6 @@ echo "8) power saving mode for cpu scheduler"
 echo "9) faux sound control"
 echo "10) selinux mode"
 echo
-echo "20) drop caches to free up RAM for apps"
 echo "21) check top 10 wake locks (ie. wakeup sources)"
 echo
 echo -n "please enter a number (or press enter to exit): "
@@ -422,15 +421,6 @@ case $option in
 	  *) mc=0;;
 	esac
 	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
-	;;
-20)
-	echo
-	grep MemFree /proc/meminfo
-	echo "Please wait..."
-	sync
-	echo 3 > /proc/sys/vm/drop_caches
-	grep MemFree /proc/meminfo
-	echo "Caches purged! You have more RAM for apps for a while."
 	;;
 21)
 	echo
