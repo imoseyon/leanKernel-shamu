@@ -100,41 +100,6 @@ CFILE="/data/data/leankernel/sensor_ind"
 SFILE="/sys/module/wakeup/parameters/enable_si_ws"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE
 
-# lkcc
-CFILE="/data/data/leankernel/cc"
-if [ -f "/data/data/leankernel/cc" ]; then
-	val=`cat /data/data/leankernel/cc`
-	case $val in
-	  1)
-		echo N > /sys/module/cpu_boost/parameters/cpuboost_enable
-		# nofreq mpdecision binary should be in already
-		# add mp5sum check etc later
-		;;
-	  2)
-		echo Y > /sys/module/cpu_boost/parameters/cpuboost_enable
-		stop mpdecision
-		echo 1 > /sys/devices/system/cpu/cpu1/online
-		echo 1 > /sys/devices/system/cpu/cpu2/online
-		echo 1 > /sys/devices/system/cpu/cpu3/online
-		echo 300000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-		echo 300000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
-		echo 300000 > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
-		echo 300000 > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
-		;;
-	  3)
-		echo N > /sys/module/cpu_boost/parameters/cpuboost_enable
-		stop mpdecision
-		echo 1 > /sys/devices/system/cpu/cpu1/online
-		echo 1 > /sys/devices/system/cpu/cpu2/online
-		echo 1 > /sys/devices/system/cpu/cpu3/online
-		echo 300000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-		echo 300000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
-		echo 300000 > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
-		echo 300000 > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
-		;;
-	esac
-fi
-
 # faux sound control
 CFILE="/data/data/leankernel/sc"
 SFILE="/sys/module/snd_soc_wcd9320/parameters/enable_fs"

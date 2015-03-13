@@ -30,7 +30,6 @@ echo "10) selinux mode"
 echo
 echo "20) drop caches to free up RAM for apps"
 echo "21) check top 10 wake locks (ie. wakeup sources)"
-echo "22) launch core control configurator"
 echo
 echo -n "please enter a number (or press enter to exit): "
 
@@ -446,9 +445,6 @@ case $option in
 	else
 		echo "busybox required!"
 	fi
-	;;
-22)
-	exec lkcc
 	;;
 99)
 	echo Y > /sys/module/selinux/parameters/force_audit;;
