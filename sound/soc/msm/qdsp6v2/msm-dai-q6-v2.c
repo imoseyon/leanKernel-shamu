@@ -844,6 +844,9 @@ static int msm_dai_q6_prepare(struct snd_pcm_substream *substream,
 	if (dai->id == SLIMBUS_1_TX && !disable_s2w) {
 		disable_s2w = true;
 		pr_info("%s: wake gestures disabled\n", __func__);
+	} else if (dai->id != SLIMBUS_1_TX && disable_s2w ) {
+		disable_s2w = false;
+		pr_info("%s: wake gestures enabled\n", __func__);
 	}
 #endif
 	return rc;
