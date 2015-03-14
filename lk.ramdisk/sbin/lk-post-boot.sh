@@ -112,6 +112,16 @@ CFILE="/data/data/leankernel/msm_hsic"
 SFILE="/sys/module/xhci_hcd/parameters/wl_divide"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE
 
+# mpdecision control
+CFILE="/data/data/leankernel/mpdd"
+if [ -f $CFILE ]; then 
+	stop mpdecision
+	echo 300000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+	echo 300000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+	echo 300000 > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+	echo 300000 > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+fi
+
 # cpu minfreq
 CFILE="/data/data/leankernel/minfreq"
 if [ -f $CFILE ]; then 
