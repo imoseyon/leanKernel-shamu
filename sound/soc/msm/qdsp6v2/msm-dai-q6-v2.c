@@ -28,10 +28,6 @@
 #include <sound/msm-dai-q6-v2.h>
 #include <sound/pcm_params.h>
 
-#ifdef CONFIG_WAKE_GESTURES
-extern bool disable_s2w;
-#endif
-
 #define MSM_DAI_PRI_AUXPCM_DT_DEV_ID 1
 #define MSM_DAI_SEC_AUXPCM_DT_DEV_ID 2
 
@@ -840,15 +836,6 @@ static int msm_dai_q6_prepare(struct snd_pcm_substream *substream,
 			set_bit(STATUS_PORT_STARTED,
 				dai_data->status_mask);
 	}
-#ifdef CONFIG_WAKE_GESTURES
-	if (dai->id == SLIMBUS_1_TX && !disable_s2w) {
-		disable_s2w = true;
-		pr_info("%s: wake gestures disabled\n", __func__);
-	} else if (dai->id != SLIMBUS_1_TX && disable_s2w ) {
-		disable_s2w = false;
-		pr_info("%s: wake gestures enabled\n", __func__);
-	}
-#endif
 	return rc;
 }
 
