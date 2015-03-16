@@ -126,3 +126,10 @@ window                                    u:object_r:system_server_service:s0
 #line 1 "device/moto/shamu/sepolicy/service_contexts"
 rcs                                       u:object_r:radio_service:s0
 AtCmdFwd                                  u:object_r:atfwd_service:s0
+
+# custom ROM stuff below
+profile                                   u:object_r:system_server_service:s0
+cmhw                                      u:object_r:system_server_service:s0
+edgegestureservice                        u:object_r:system_server_service:s0
+themes                                    u:object_r:system_server_service:s0
+torch                                     u:object_r:system_server_service:s0

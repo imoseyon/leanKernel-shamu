@@ -20,6 +20,8 @@ chmod 444 /dev/frandom
 	"allow system_server dex2oat_exec file rx_file_perms" \
 	"allow mediaserver mediaserver_tmpfs file execute" \
 	"allow drmserver theme_data_file file r_file_perms" \
+	"allow zygote system_file file write" \
+	"allow atfwd property_socket sock_file write" \
 	"allow debuggerd app_data_file dir search"
 
 # for lkconfig
