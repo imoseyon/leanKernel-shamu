@@ -29,6 +29,12 @@
 #include <linux/syscore_ops.h>
 #include <linux/tick.h>
 #include <trace/events/power.h>
+#include <linux/moduleparam.h>
+
+bool allow_minup = true;
+module_param(allow_minup, bool, 0644);
+bool allow_maxdown = true;
+module_param(allow_maxdown, bool, 0644);
 
 /**
  * The "cpufreq driver" - the arch- or hardware-dependent low
@@ -2028,8 +2034,19 @@ static int cpufreq_set_policy(struct cpufreq_policy *policy,
 	blocking_notifier_call_chain(&cpufreq_policy_notifier_list,
 			CPUFREQ_NOTIFY, new_policy);
 
-	policy->min = new_policy->min;
-	policy->max = new_policy->max;
+	if (likely(allow_minup)) policy->min = new_policy->min;
+	// do not allow mpd or thermal to raise minfreq
+	else if (new_policy->min < policy->min ||
+		(strcmp(current->comm, "mpdecision") &&
+		strcmp(current->comm, "msm_thermal:fre")))
+			policy->min = new_policy->min;
+
+	if (likely(allow_maxdown)) policy->max = new_policy->max;
+	// do not allow mpd or thermal to lower maxfreq
+	else if (new_policy->max > policy->max ||
+		(strcmp(current->comm, "msm_thermal:fre") &&
+		strcmp(current->comm, "mpdecision")))
+			policy->max = new_policy->max;
 
 	pr_debug("new min and max freqs are %u - %u kHz\n",
 					policy->min, policy->max);
