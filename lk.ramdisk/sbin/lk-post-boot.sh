@@ -114,15 +114,16 @@ CFILE="/data/data/leankernel/msm_hsic"
 SFILE="/sys/module/xhci_hcd/parameters/wl_divide"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE
 
-# mpdecision control
-CFILE="/data/data/leankernel/mpdd"
-if [ -f $CFILE ]; then 
-	stop mpdecision
-	echo 300000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-	echo 300000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
-	echo 300000 > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
-	echo 300000 > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
-fi
+# min/max freq prevention control
+CFILE="/data/data/leankernel/allow_minup"
+SFILE="/sys/module/cpufreq/parameters/allow_minup"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+CFILE="/data/data/leankernel/allow_maxdown"
+SFILE="/sys/module/cpufreq/parameters/allow_maxdown"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+CFILE="/data/data/leankernel/cpuboost_enable"
+SFILE="/sys/module/cpu_boost/parameters/cpuboost_enable"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE
 
 # cpu minfreq
 CFILE="/data/data/leankernel/minfreq"

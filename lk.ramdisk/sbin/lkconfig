@@ -27,7 +27,7 @@ echo "7) vibe strength"
 echo "8) power saving mode for cpu scheduler"
 echo "9) faux sound control"
 echo "10) selinux mode"
-echo "11) mpdecision control"
+echo "11) min/max freq change prevention"
 echo
 echo "21) check top 10 wake locks (ie. wakeup sources)"
 echo
@@ -81,8 +81,7 @@ case $option in
 	cat /sys/module/snd_soc_wcd9320/parameters/enable_fs
 	echo -n "10) selinux mode (1 is enforcing, 0 is permissive): "
 	cat /sys/fs/selinux/enforce
-	echo;echo -n "11) mpdecision: "
-	[ -f "$lkdata/mpdd" ] && echo "disabled" || echo "enabled"
+	echo;echo "11) allow raising of minfreq: `cat /sys/module/cpufreq/parameters/allow_minup`, allow lowering of maxfreq: `cat /sys/module/cpufreq/parameters/allow_maxdown`"
 	;;
 1)
 	echo -n "Enter 1 for min freq, 2 for max freq, 3 for interactiveX screen-off freq:"
@@ -426,20 +425,32 @@ case $option in
 	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
 11)
-	echo -n "Enter 0 to disable or 1 to enable mpdecision (default):"
+	echo -n "Enter 1 to prevent raising minfreq, 2 to prevent lowering maxfreq, 3 to prevent both, 0 to allow both (stock):"
 	read value
 	case $value in
 	  0)
-		stop mpdecision
-		touch $lkdata/mpdd
-		echo 300000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-		echo 300000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
-		echo 300000 > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
-		echo 300000 > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+		rm -f $lkdata/allow_minup $lkdata/cpuboost_enable $lkdata/allow_maxdown
+		echo Y > /sys/module/cpufreq/parameters/allow_minup
+		echo Y > /sys/module/cpufreq/parameters/allow_maxdown
+		echo Y > /sys/module/cpu_boost/parameters/cpuboost_enable
 		;;
 	  1)
-		start mpdecision
-		rm -f $lkdata/mpdd
+		echo N > /sys/module/cpufreq/parameters/allow_minup
+		echo N > $lkdata/allow_minup
+		echo N > /sys/module/cpu_boost/parameters/cpuboost_enable
+		echo N > $lkdata/cpuboost_enable
+		;;
+	  2)
+		echo N > /sys/module/cpufreq/parameters/allow_maxdown
+		echo N > $lkdata/allow_maxdown
+		;;
+	  3)
+		echo N > /sys/module/cpufreq/parameters/allow_minup
+		echo N > $lkdata/allow_minup
+		echo N > /sys/module/cpufreq/parameters/allow_maxdown
+		echo N > $lkdata/allow_maxdown
+		echo N > /sys/module/cpu_boost/parameters/cpuboost_enable
+		echo N > $lkdata/cpuboost_enable
 		;;
 	  *) mc=0;;
 	esac
