@@ -22,6 +22,7 @@ chmod 444 /dev/frandom
 	"allow drmserver theme_data_file file r_file_perms" \
 	"allow zygote system_file file write" \
 	"allow atfwd property_socket sock_file write" \
+	"allow untrusted_app sysfs_display file { open read write getattr add_name setattr remove_name }" \
 	"allow debuggerd app_data_file dir search"
 
 # for lkconfig
