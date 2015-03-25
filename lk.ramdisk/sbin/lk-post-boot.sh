@@ -120,7 +120,7 @@ CFILE="/data/data/leankernel/allow_minup"
 SFILE="/sys/module/cpufreq/parameters/allow_minup"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE
 CFILE="/data/data/leankernel/allow_maxdown"
-SFILE="/sys/module/cpufreq/parameters/allow_maxdown"
+SFILE="/sys/module/msm_thermal/parameters/full_fm"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE
 CFILE="/data/data/leankernel/cpuboost_enable"
 SFILE="/sys/module/cpu_boost/parameters/cpuboost_enable"

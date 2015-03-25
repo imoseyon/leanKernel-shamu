@@ -81,7 +81,7 @@ case $option in
 	cat /sys/module/snd_soc_wcd9320/parameters/enable_fs
 	echo -n "10) selinux mode (1 is enforcing, 0 is permissive): "
 	cat /sys/fs/selinux/enforce
-	echo;echo "11) allow raising of minfreq: `cat /sys/module/cpufreq/parameters/allow_minup`, allow lowering of maxfreq: `cat /sys/module/cpufreq/parameters/allow_maxdown`"
+	echo;echo "11) allow raising of minfreq: `cat /sys/module/cpufreq/parameters/allow_minup`, allow lowering of maxfreq: `cat /sys/module/msm_thermal/parameters/full_fm`"
 	;;
 1)
 	echo -n "Enter 1 for min freq, 2 for max freq, 3 for interactiveX screen-off freq:"
@@ -431,7 +431,7 @@ case $option in
 	  0)
 		rm -f $lkdata/allow_minup $lkdata/cpuboost_enable $lkdata/allow_maxdown
 		echo Y > /sys/module/cpufreq/parameters/allow_minup
-		echo Y > /sys/module/cpufreq/parameters/allow_maxdown
+		echo Y > /sys/module/msm_thermal/parameters/full_fm
 		echo Y > /sys/module/cpu_boost/parameters/cpuboost_enable
 		;;
 	  1)
@@ -441,13 +441,13 @@ case $option in
 		echo N > $lkdata/cpuboost_enable
 		;;
 	  2)
-		echo N > /sys/module/cpufreq/parameters/allow_maxdown
+		echo N > /sys/module/msm_thermal/parameters/full_fm
 		echo N > $lkdata/allow_maxdown
 		;;
 	  3)
 		echo N > /sys/module/cpufreq/parameters/allow_minup
 		echo N > $lkdata/allow_minup
-		echo N > /sys/module/cpufreq/parameters/allow_maxdown
+		echo N > /sys/module/msm_thermal/parameters/full_fm
 		echo N > $lkdata/allow_maxdown
 		echo N > /sys/module/cpu_boost/parameters/cpuboost_enable
 		echo N > $lkdata/cpuboost_enable
