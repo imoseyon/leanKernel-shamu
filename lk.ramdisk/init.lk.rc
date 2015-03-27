@@ -6,7 +6,7 @@ service supolicy /sbin/supolicy --live \
      disabled
      oneshot
 
-service selinux_mode /sbin/lk-selinux-mode.sh
+service run_earlier /sbin/lk-early-boot.sh
      disabled
      oneshot
 
@@ -14,7 +14,7 @@ on fs
      start supolicy
 
 on post-fs-data
-     start selinux_mode
+     start run_earlier
 
 on boot
      chown system system /sys/class/leds/charging/brightness
