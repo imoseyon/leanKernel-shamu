@@ -73,3 +73,7 @@ on property:fku.perf.profile=2
     write /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq 2649600
     write /sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq 2649600
     write /sys/class/devfreq/fdb00000.qcom,kgsl-3d0/max_freq 600000000
+
+# CM stuff
+on property:ro.cm.version=*
+    export SYSTEMSERVERCLASSPATH /system/framework/org.cyanogenmod.hardware.jar:/system/framework/services.jar:/system/framework/ethernet-service.jar:/system/framework/wifi-service.jar
