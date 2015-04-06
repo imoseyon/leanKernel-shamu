@@ -31,6 +31,7 @@
 #include <trace/events/power.h>
 #include <linux/moduleparam.h>
 
+static unsigned int lkuser_max = 0;
 bool allow_minup = true;
 module_param(allow_minup, bool, 0644);
 
@@ -412,7 +413,14 @@ static ssize_t show_##file_name				\
 }
 
 show_one(cpuinfo_min_freq, cpuinfo.min_freq);
-show_one(cpuinfo_max_freq, cpuinfo.max_freq);
+
+static ssize_t show_cpuinfo_max_freq
+(struct cpufreq_policy *policy, char *buf)
+{
+	if (lkuser_max) return sprintf(buf, "%u\n", lkuser_max);
+	else return sprintf(buf, "%u\n", policy->cpuinfo.max_freq);
+}
+
 show_one(cpuinfo_transition_latency, cpuinfo.transition_latency);
 show_one(scaling_min_freq, min);
 show_one(scaling_max_freq, max);
@@ -455,7 +463,39 @@ static ssize_t store_##file_name					\
 }
 
 store_one(scaling_min_freq, min);
-store_one(scaling_max_freq, max);
+
+static ssize_t store_scaling_max_freq
+(struct cpufreq_policy *policy, const char *buf, size_t count)
+{
+        int ret;
+        struct cpufreq_policy new_policy;
+
+        ret = cpufreq_get_policy(&new_policy, policy->cpu);
+        if (ret)
+                return -EINVAL;
+
+        new_policy.max = new_policy.user_policy.max;
+
+        ret = sscanf(buf, "%u", &new_policy.max);
+        if (ret != 1)
+                return -EINVAL;
+
+        ret = cpufreq_driver->verify(&new_policy);
+        if (ret)
+                pr_err("cpufreq: Frequency verification failed\n");
+
+        if (!strcmp(current->comm, "lkconfig") ||
+		!strcmp(current->comm, "lk") ||
+                !strcmp(current->comm, "lk-post-boot.sh"))
+		lkuser_max = new_policy.max;
+
+	if (lkuser_max) new_policy.max = min(new_policy.max, lkuser_max);
+        policy->user_policy.max = new_policy.max;
+
+        ret = cpufreq_set_policy(policy, &new_policy);
+
+        return ret ? ret : count;
+}
 
 /**
  * show_cpuinfo_cur_freq - current CPU frequency as detected by hardware
