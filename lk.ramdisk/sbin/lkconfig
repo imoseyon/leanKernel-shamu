@@ -7,6 +7,7 @@ minfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq`
 maxfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq`
 f1="/sys/devices/system/cpu/cpu"
 f2="/cpufreq/scaling_min_freq"
+f3="/cpufreq/scaling_max_freq"
 lkdata="/data/data/leankernel"
 
 while true; do
@@ -119,9 +120,9 @@ case $option in
 		esac
 		if [ $mc -eq 1 ]; then
 		  echo $FREQ > $lkdata/maxfreq
-		  echo $FREQ > ${f1}0${f2}
+		  echo $FREQ > ${f1}0${f3}
 		  for i in 1 2 3; do
-			[ -f $f1$i$f2 ] && echo $FREQ > $f1$i$f2
+			[ -f $f1$i$f3 ] && echo $FREQ > $f1$i$f3
 		  done
 		fi
 		;;
