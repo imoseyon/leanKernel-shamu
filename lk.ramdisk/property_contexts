@@ -68,8 +68,8 @@ ctl.                    u:object_r:ctl_default_prop:s0
 nfc.                    u:object_r:nfc_prop:s0
 #line 1 "device/moto/shamu/sepolicy/property_contexts"
 sys.ims.        u:object_r:qcom_ims_prop:s0
-
-# custom ROM stuff
+#line 1 "vendor/eos/sepolicy/property_contexts"
 service.adb.tcp.port          u:object_r:adbtcp_prop:s0
 recovery.perf.mode            u:object_r:recovery_prop:s0
 adb.secure                    u:object_r:recovery_prop:s0
+eos.userinit.active            u:object_r:userinit_prop:s0
