@@ -36,7 +36,7 @@ zipit() {
   cd $sdir
 } 
 
-[[ $1 =~ "ocuc" ]] && git checkout $ocuc_branch arch/arm/boot/dts/qcom/apq8084.dtsi
+[[ $1 =~ "ocuc" ]] && git checkout $ocuc_branch arch/arm/boot/dts/qcom/apq8084.dtsi drivers/thermal/lk_thermal.h
 compile $1 && ramdisk && zipit $filename
-[[ $1 =~ "ocuc" ]] && git checkout HEAD arch/arm/boot/dts/qcom/apq8084.dtsi
+[[ $1 =~ "ocuc" ]] && git checkout HEAD arch/arm/boot/dts/qcom/apq8084.dtsi drivers/thermal/lk_thermal.h
 #compile $1 && ramdisk 
