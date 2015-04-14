@@ -1,0 +1,1 @@
+#define LK_MAXFREQ 2880000
