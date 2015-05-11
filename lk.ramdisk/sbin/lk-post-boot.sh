@@ -124,6 +124,10 @@ CFILE="/data/data/leankernel/cpuboost_enable"
 SFILE="/sys/module/cpu_boost/parameters/cpuboost_enable"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE
 
+# power profiles
+CFILE="/data/data/leankernel/pprofile"
+[ -f $CFILE ] && setprop fku.perf.profile `cat $CFILE`
+
 # cpu minfreq
 CFILE="/data/data/leankernel/minfreq"
 if [ -f $CFILE ]; then 

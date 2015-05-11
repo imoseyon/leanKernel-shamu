@@ -29,6 +29,7 @@ echo "8) power saving mode for cpu scheduler"
 echo "9) faux sound control"
 echo "10) selinux mode"
 echo "11) min/max freq change prevention"
+echo "12) power profiles"
 echo
 echo "21) check top 10 wake locks (ie. wakeup sources)"
 echo
@@ -83,6 +84,14 @@ case $option in
 	echo -n "10) selinux mode (1 is enforcing, 0 is permissive): "
 	cat /sys/fs/selinux/enforce
 	echo;echo "11) allow raising of minfreq: `cat /sys/module/cpufreq/parameters/allow_minup`, allow lowering of maxfreq: `cat /sys/module/msm_thermal/parameters/full_fm`"
+	if [ -f $lkdata/pprofile ]; then
+		echo -n "12) power profile: "
+		pp=`cat $lkdata/pprofile`
+		case $pp in
+			0) echo "power saving";;
+			1) echo "balanced (default)";;
+		esac
+	fi
 	;;
 1)
 	echo -n "Enter 1 for min freq, 2 for max freq, 3 for interactiveX screen-off freq:"
@@ -454,6 +463,18 @@ case $option in
 		echo N > $lkdata/cpuboost_enable
 		;;
 	  *) mc=0;;
+	esac
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
+	;;
+12)
+	echo -n "Enter 1 for kernel default, 0 for powersaving profile:"
+	read value
+	case $value in
+		0|1)
+			setprop fku.perf.profile $value
+			echo $value > $lkdata/pprofile
+			;;
+		*) mc=0;;
 	esac
 	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
