@@ -419,6 +419,22 @@ service netmgrd /system/bin/netmgrd
     class main
     group radio
 
+service imsqmidaemon /system/bin/imsqmidaemon
+    class main
+    user system
+    socket ims_qmid stream 0660 system radio
+    group radio log
+
+service imsdatadaemon /system/bin/imsdatadaemon
+    class main
+    user root
+    socket ims_datad stream 0660 system radio
+    group system wifi radio inet log
+    disabled
+
+on property:sys.ims.QMI_DAEMON_STATUS=1
+    start imsdatadaemon
+
 service sensors /system/bin/sensors.qcom
     class core
     user root
@@ -522,7 +538,7 @@ service iprenew_eth0 /system/bin/dhcpcd -n
     oneshot
 
 service adspd /system/bin/adspd /dev/ttyHS3
-   class late_start
+   class main
    socket adspdsock stream 0660 media media
    user media
    group media input
@@ -647,3 +663,7 @@ service atfwd /system/bin/ATFWD-daemon
     class late_start
     user system
     group system radio
+
+service cnd /system/bin/cnd
+    class late_start
+    socket cnd stream 660 root inet
