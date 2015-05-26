@@ -88,7 +88,8 @@ case $option in
 		pp=`cat $lkdata/pprofile`
 		case $pp in
 			0) echo "power saving";;
-			1) echo "balanced (default)";;
+			1) echo "balanced";;
+			2) echo "performance (default)";;
 		esac
 	fi
 	;;
@@ -467,7 +468,7 @@ case $option in
 	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
 12)
-	echo -n "Enter 1 for kernel default, 0 for powersaving profile:"
+	echo -n "Enter 2 for performance (default), 1 for balanced, and 0 for powersaving profile:"
 	read value
 	case $value in
 		0|1)
