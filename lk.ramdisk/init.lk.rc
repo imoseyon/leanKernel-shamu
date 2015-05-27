@@ -72,6 +72,9 @@ on property:fku.perf.profile=2
     write /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy performance
 
 # custom rom path
-on property:ro.modversion=*
+on fs
+    export SYSTEMSERVERCLASSPATH /system/framework/services.jar:/system/framework/ethernet-service.jar:/system/framework/wifi-service.jar
+
+on property:ro.cm.device=*
     export SYSTEMSERVERCLASSPATH /system/framework/org.cyanogenmod.platform.jar:/system/framework/org.cyanogenmod.hardware.jar:/system/framework/services.jar:/system/framework/ethernet-service.jar:/system/framework/wifi-service.jar
     export LD_PRELOAD libsigchain.so
