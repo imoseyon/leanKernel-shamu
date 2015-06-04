@@ -182,6 +182,34 @@ int wifi_platform_bus_enumerate(wifi_adapter_info_t *adapter, bool device_presen
 
 }
 
+int wifi_platform_get_wake_irq(wifi_adapter_info_t *adapter)
+{
+	struct wifi_platform_data *plat_data;
+
+	if (!adapter || !adapter->wifi_plat_data)
+		return -1;
+	plat_data = adapter->wifi_plat_data;
+	if (plat_data->get_wake_irq)
+		return plat_data->get_wake_irq();
+	return -1;
+}
+
+bool wifi_process_partial_resume(wifi_adapter_info_t *adapter, int action)
+{
+#ifdef CONFIG_PARTIALRESUME
+	struct wifi_platform_data *plat_data;
+
+	if (!adapter || !adapter->wifi_plat_data)
+		return false;
+	plat_data = adapter->wifi_plat_data;
+	if (plat_data->partial_resume)
+		return plat_data->partial_resume(action);
+	return false;
+#else
+	return false;
+#endif
+}
+
 int wifi_platform_get_mac_addr(wifi_adapter_info_t *adapter, unsigned char *buf)
 {
 	struct wifi_platform_data *plat_data;

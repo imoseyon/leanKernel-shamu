@@ -38,7 +38,7 @@
 #include <dhd_proto.h>
 #include <dhd_bus.h>
 #include <dhd_dbg.h>
-
+#include <dhd_debug.h>
 #include <siutils.h>
 
 
@@ -655,6 +655,9 @@ int dhd_prot_attach(dhd_pub_t *dhd)
 	/* DMAing ring completes supported? FALSE by default  */
 	dhd->dma_d2h_ring_upd_support = FALSE;
 	dhd->dma_h2d_ring_upd_support = FALSE;
+
+	/* set  the memdump capability */
+	dhd->memdump_enabled = DUMP_MEMONLY;
 
 	/* Ring Allocations */
 	/* 1.0	 H2D	TXPOST ring */
@@ -1830,7 +1833,9 @@ dhd_prot_event_process(dhd_pub_t *dhd, void* buf, uint16 len)
 	void* pkt;
 	unsigned long flags;
 	dhd_prot_t *prot = dhd->prot;
-
+#ifdef DHD_WAKE_STATUS
+	int pkt_wake = bcmpcie_set_get_wake(dhd->bus, 0);
+#endif
 	/* Event complete header */
 	evnt = (wlevent_req_msg_t *)buf;
 	bufid = ltoh32(evnt->cmn_hdr.request_id);
@@ -1860,6 +1865,9 @@ dhd_prot_event_process(dhd_pub_t *dhd, void* buf, uint16 len)
 
 	PKTSETLEN(dhd->osh, pkt, buflen);
 
+#ifdef DHD_WAKE_STATUS
+	dhd->bus->rcwake += pkt_wake;
+#endif
 	dhd_bus_rx_frame(dhd->bus, pkt, ifidx, 1);
 }
 
@@ -1872,7 +1880,9 @@ dhd_prot_rxcmplt_process(dhd_pub_t *dhd, void* buf, uint16 msglen)
 	unsigned long flags;
 	static uint8 current_phase = 0;
 	uint ifidx;
-
+#ifdef DHD_WAKE_STATUS
+	int pkt_wake = bcmpcie_set_get_wake(dhd->bus, 0);
+#endif
 	/* RXCMPLT HDR */
 	rxcmplt_h = (host_rxbuf_cmpl_t *)buf;
 
@@ -1926,6 +1936,9 @@ dhd_prot_rxcmplt_process(dhd_pub_t *dhd, void* buf, uint16 msglen)
 	memset(buf, 0 , msglen);
 	rxcmplt_h->marker = PCIE_D2H_RESET_MARK;
 
+#ifdef DHD_WAKE_STATUS
+	dhd->bus->rxwake += pkt_wake;
+#endif
 #ifdef DHD_RX_CHAINING
 	/* Chain the packets */
 	dhd_rxchain_frame(dhd, pkt, ifidx);

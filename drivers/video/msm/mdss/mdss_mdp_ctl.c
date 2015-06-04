@@ -1761,7 +1761,6 @@ struct mdss_mdp_ctl *mdss_mdp_ctl_init(struct mdss_panel_data *pdata,
 	ctl->panel_data = pdata;
 	ctl->is_video_mode = false;
 	ctl->perf_release_ctl_bw = false;
-	ctl->wait4pingpong_tout = false;
 
 	switch (pdata->panel_info.type) {
 	case EDP_PANEL:
@@ -2101,6 +2100,12 @@ int mdss_mdp_ctl_start(struct mdss_mdp_ctl *ctl, bool handoff)
 		return ret;
 
 	sctl = mdss_mdp_get_split_ctl(ctl);
+
+	if (sctl) {
+		/* split display */
+		ctl->panel_data->panel_info.is_split_display = true;
+		sctl->panel_data->panel_info.is_split_display = true;
+	}
 
 	mutex_lock(&ctl->lock);
 

@@ -350,13 +350,14 @@ struct mdss_panel_info {
 	u32 cont_splash_enabled;
 	bool cont_splash_esd_rdy;
 	u32 partial_update_enabled;
-	u32 partial_update_dcs_cmd_by_left;
+	u32 dcs_cmd_by_left;
 	u32 partial_update_roi_merge;
 	struct ion_handle *splash_ihdl;
 	int panel_power_state;
 	int blank_state;
 	bool hbm_feature_enabled;
 	bool hbm_state;
+	bool is_split_display;
 
 	uint32_t panel_dead;
 
