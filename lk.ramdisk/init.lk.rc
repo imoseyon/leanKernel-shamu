@@ -2,7 +2,9 @@
 service supolicy /sbin/supolicy --live \
 	"allow sensors diag_device chr_file { read write open ioctl }" \
 	"allow sensors sensors capability net_raw" \
-	"allow init kernel security setenforce"
+	"allow init kernel security setenforce" \
+	"allow netmgrd netmgrd netlink_xfrm_socket nlmsg_write" \
+	"allow netmgrd netmgrd socket { read write open ioctl }"
      disabled
      oneshot
 
