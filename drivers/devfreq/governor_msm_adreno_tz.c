@@ -51,17 +51,8 @@ static DEFINE_SPINLOCK(tz_lock);
 
 #define TAG "msm_adreno_tz: "
 
-/* Trap into the TrustZone, and call funcs there. */
-static int __secure_tz_entry2(u32 cmd, u32 val1, u32 val2)
-{
-	int ret;
-	spin_lock(&tz_lock);
-	/* sync memory before sending the commands to tz*/
-	__iowmb();
-	ret = scm_call_atomic2(SCM_SVC_IO, cmd, val1, val2);
-	spin_unlock(&tz_lock);
-	return ret;
-}
+/* Boolean to detect if pm has entered suspend mode */
+static bool suspended = false;
 
 static int __secure_tz_entry3(u32 cmd, u32 val1, u32 val2, u32 val3)
 {
@@ -125,7 +116,7 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq,
 	 * Force to use & record as min freq when system has
 	 * entered pm-suspend or screen-off state.
 	 */
-	if (!mdss_screen_on) {
+	if (suspended || !mdss_screen_on) {
 		*freq = devfreq->profile->freq_table[devfreq->profile->max_state - 1];
 		return 0;
 	}
@@ -315,6 +306,8 @@ static int tz_resume(struct devfreq *devfreq)
 	struct devfreq_dev_profile *profile = devfreq->profile;
 	unsigned long freq;
 
+	suspended = false;
+
 	freq = profile->initial_freq;
 
 	return profile->target(devfreq->dev.parent, &freq, 0);
@@ -323,15 +316,20 @@ static int tz_resume(struct devfreq *devfreq)
 static int tz_suspend(struct devfreq *devfreq)
 {
 	struct devfreq_msm_adreno_tz_data *priv = devfreq->data;
+	struct devfreq_dev_profile *profile = devfreq->profile;
+	unsigned long freq;
 
-	__secure_tz_entry2(TZ_RESET_ID, 0, 0);
+	suspended = true;
 
 	priv->bin.total_time = 0;
 	priv->bin.busy_time = 0;
 	priv->bus.total_time = 0;
 	priv->bus.gpu_time = 0;
 	priv->bus.ram_time = 0;
-	return 0;
+
+	freq = profile->freq_table[profile->max_state - 1];
+
+	return profile->target(devfreq->dev.parent, &freq, 0);
 }
 
 static int tz_handler(struct devfreq *devfreq, unsigned int event, void *data)
