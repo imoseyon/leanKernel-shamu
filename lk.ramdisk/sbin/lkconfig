@@ -471,7 +471,7 @@ case $option in
 	echo -n "Enter 2 for performance (default), 1 for balanced, and 0 for powersaving profile:"
 	read value
 	case $value in
-		0|1)
+		0|1|2)
 			setprop fku.perf.profile $value
 			echo $value > $lkdata/pprofile
 			;;
