@@ -8,6 +8,10 @@
 #include <linux/wlan_plat.h>
 #include <linux/mmc/host.h>
 #include <linux/if.h>
+#ifdef CONFIG_PARTIALRESUME
+#include <linux/partialresume.h>
+#include <linux/spinlock.h>
+#endif
 
 #include <mach/gpio.h>
 #include <mach/board.h>
@@ -21,6 +25,11 @@
 #define BCM_DBG pr_debug
 
 static int gpio_wl_reg_on = 82;
+static int brcm_wake_irq = -1;
+
+#ifdef CONFIG_PARTIALRESUME
+static bool bcm_wifi_process_partial_resume(int action);
+#endif
 
 #ifdef CONFIG_DHD_USE_STATIC_BUF
 
@@ -360,6 +369,7 @@ struct cntry_locales_custom brcm_wlan_translate_nodfs_table[] = {
 	{"HU", "E0", 32},
 	{"IE", "E0", 32},
 	{"IN", "IN", 28},
+	{"ID", "ID", 5},
 	{"IS", "E0", 32},
 	{"IT", "E0", 32},
 	{"JP", "JP", 86},
@@ -470,6 +480,10 @@ static int brcm_wifi_get_mac_addr(unsigned char *buf)
 	return 0;
 }
 
+static int brcm_wlan_get_wake_irq(void)
+{
+	return brcm_wake_irq;
+}
 
 static struct resource brcm_wlan_resources[] = {
 	[0] = {
@@ -489,7 +503,11 @@ static struct wifi_platform_data brcm_wlan_control = {
 #ifdef CONFIG_DHD_USE_STATIC_BUF
 	.mem_prealloc	= brcm_wlan_mem_prealloc,
 #endif
+	.get_wake_irq	= brcm_wlan_get_wake_irq,
 	.get_country_code = brcm_wlan_get_country_code,
+#ifdef CONFIG_PARTIALRESUME
+	.partial_resume = bcm_wifi_process_partial_resume,
+#endif
 };
 
 static struct platform_device brcm_device_wlan = {
@@ -516,8 +534,116 @@ int __init brcm_wlan_init(void)
 
 	np = of_find_compatible_node(NULL, NULL, "bcm,bcm4356");
 	brcm_device_wlan.dev.of_node = np;
+	brcm_wake_irq = gpio_to_irq(of_get_named_gpio(np, "wl_host_wake", 0));
 
 	brcm_wifi_init_gpio(np);
 	return rc;
 }
 subsys_initcall(brcm_wlan_init);
+
+#ifdef CONFIG_PARTIALRESUME
+static bool smd_partial_resume(struct partial_resume *pr)
+{
+	return true;
+}
+
+#define PR_INIT_STATE          0
+#define PR_IN_RESUME_STATE     1
+#define PR_RESUME_OK_STATE     2
+#define PR_SUSPEND_OK_STATE    3
+
+static DECLARE_COMPLETION(bcm_comp);
+static int bcm_suspend = PR_INIT_STATE;
+static spinlock_t bcm_lock;
+
+/*
+ * Partial Resume State Machine:
+    _______
+   / else [INIT]________________________
+   \______/   | notify_resume           \
+           [IN_RESUME]              wait_for_ready
+           /       \ vote_for_suspend   /
+   vote_for_resume [SUSPEND_OK]________/
+           \       / vote_for_resume  /
+          [RESUME_OK]                /
+                   \________________/
+ */
+
+static bool bcm_wifi_process_partial_resume(int action)
+{
+	bool suspend = false;
+	int timeout = 0;
+
+	if ((action != WIFI_PR_NOTIFY_RESUME) && (bcm_suspend == PR_INIT_STATE))
+		return suspend;
+
+	if (action == WIFI_PR_WAIT_FOR_READY)
+		timeout = wait_for_completion_timeout(&bcm_comp,
+						      msecs_to_jiffies(50));
+
+	spin_lock(&bcm_lock);
+	switch (action) {
+	case WIFI_PR_WAIT_FOR_READY:
+		suspend = (bcm_suspend == PR_SUSPEND_OK_STATE) && (timeout != 0);
+		bcm_suspend = PR_INIT_STATE;
+		break;
+	case WIFI_PR_VOTE_FOR_RESUME:
+		bcm_suspend = PR_RESUME_OK_STATE;
+		complete(&bcm_comp);
+		break;
+	case WIFI_PR_VOTE_FOR_SUSPEND:
+		if (bcm_suspend == PR_IN_RESUME_STATE)
+			bcm_suspend = PR_SUSPEND_OK_STATE;
+		complete(&bcm_comp);
+		break;
+	case WIFI_PR_NOTIFY_RESUME:
+		INIT_COMPLETION(bcm_comp);
+		bcm_suspend = PR_IN_RESUME_STATE;
+		break;
+	case WIFI_PR_INIT:
+		bcm_suspend = PR_INIT_STATE;
+		break;
+	}
+	spin_unlock(&bcm_lock);
+	return suspend;
+}
+
+bool wlan_vote_for_suspend(void)
+{
+	return bcm_wifi_process_partial_resume(WIFI_PR_VOTE_FOR_SUSPEND);
+}
+EXPORT_SYMBOL(wlan_vote_for_suspend);
+
+static bool bcm_wifi_partial_resume(struct partial_resume *pr)
+{
+	bool suspend;
+
+	suspend = bcm_wifi_process_partial_resume(WIFI_PR_WAIT_FOR_READY);
+	pr_info("%s: vote %d\n", __func__, suspend);
+	return suspend;
+}
+
+static struct partial_resume smd_pr = {
+	.irq = 200,
+	.partial_resume = smd_partial_resume,
+};
+
+static struct partial_resume wlan_pr = {
+	.partial_resume = bcm_wifi_partial_resume,
+};
+
+int __init wlan_partial_resume_init(void)
+{
+	int rc;
+
+	/* Setup partial resume */
+	spin_lock_init(&bcm_lock);
+	wlan_pr.irq = brcm_wake_irq;
+	printk("%s: Wlan wake IRQ = %d\n", __func__, wlan_pr.irq);
+	rc = register_partial_resume(&wlan_pr);
+	rc = register_partial_resume(&smd_pr);
+	return rc;
+}
+
+late_initcall(wlan_partial_resume_init);
+#endif
