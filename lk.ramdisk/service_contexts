@@ -135,3 +135,4 @@ themes                                    u:object_r:system_server_service:s0
 torch                                     u:object_r:system_server_service:s0
 killswitch                                u:object_r:system_server_service:s0
 cmstatusbar                               u:object_r:system_server_service:s0
+cneservice                                u:object_r:cne_service:s0

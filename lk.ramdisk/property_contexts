@@ -68,6 +68,7 @@ ctl.                    u:object_r:ctl_default_prop:s0
 nfc.                    u:object_r:nfc_prop:s0
 #line 1 "device/moto/shamu/sepolicy/property_contexts"
 sys.ims.        u:object_r:qcom_ims_prop:s0
+net.r_rmnet     u:object_r:qcom_netmgrd_prop:s0
 #line 1 "vendor/cm/sepolicy/property_contexts"
 service.adb.tcp.port          u:object_r:adbtcp_prop:s0
 recovery.perf.mode            u:object_r:recovery_prop:s0
