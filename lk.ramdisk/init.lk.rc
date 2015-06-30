@@ -72,11 +72,3 @@ on property:fku.perf.profile=2
     write /sys/class/devfreq/fdb00000.qcom,kgsl-3d0/max_freq 600000000
     write /sys/class/devfreq/fdb00000.qcom,kgsl-3d0/governor msm-adreno-tz
     write /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy performance
-
-# custom rom path
-on fs
-    export SYSTEMSERVERCLASSPATH /system/framework/services.jar:/system/framework/ethernet-service.jar:/system/framework/wifi-service.jar
-
-on property:ro.cm.device=*
-    export SYSTEMSERVERCLASSPATH /system/framework/org.cyanogenmod.platform.jar:/system/framework/org.cyanogenmod.hardware.jar:/system/framework/services.jar:/system/framework/ethernet-service.jar:/system/framework/wifi-service.jar
-    export LD_PRELOAD libsigchain.so
