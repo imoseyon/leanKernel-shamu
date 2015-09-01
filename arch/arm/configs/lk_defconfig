@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm 3.10.84 Kernel Configuration
+# Linux/arm 3.10.86 Kernel Configuration
 #
 CONFIG_ARM=y
 CONFIG_ARM_HAS_SG_CHAIN=y
@@ -34,7 +34,7 @@ CONFIG_BUILDTIME_EXTABLE_SORT=y
 #
 CONFIG_INIT_ENV_ARG_LIMIT=32
 CONFIG_CROSS_COMPILE=""
-CONFIG_LOCALVERSION="-leanKernel-shamu-2.12-"
+CONFIG_LOCALVERSION="-leanKernel-shamu-2.13-"
 # CONFIG_LOCALVERSION_AUTO is not set
 CONFIG_HAVE_KERNEL_GZIP=y
 CONFIG_HAVE_KERNEL_LZMA=y
@@ -1546,13 +1546,11 @@ CONFIG_BCMDHD=y
 CONFIG_BCMDHD_PCIE=y
 # CONFIG_BCM4354 is not set
 CONFIG_BCM4356=y
-# CONFIG_BCM4358 is not set
 CONFIG_BCMDHD_FW_PATH="/vendor/firmware/fw_bcmdhd.bin"
 CONFIG_BCMDHD_NVRAM_PATH="/etc/wifi/bcmdhd.cal"
 CONFIG_DHD_USE_STATIC_BUF=y
 CONFIG_DHD_USE_SCHED_SCAN=y
 CONFIG_DHD_SET_RANDOM_MAC_VAL=0x9068C3
-# CONFIG_DHD_OF_SUPPORT is not set
 
 #
 # Enable WiMAX (Networking options) to see the WiMAX drivers
