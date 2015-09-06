@@ -1,0 +1,25 @@
+#
+# ADDITIONAL_DEFAULT_PROPERTIES
+#
+ro.secure=1
+ro.allow.mock.location=0
+ro.debuggable=0
+ro.zygote=zygote32
+dalvik.vm.image-dex2oat-Xms=64m
+dalvik.vm.image-dex2oat-Xmx=64m
+dalvik.vm.dex2oat-Xms=64m
+dalvik.vm.dex2oat-Xmx=512m
+ro.dalvik.vm.native.bridge=0
+debug.atrace.tags.enableflags=0
+camera.disable_zsl_mode=0
+persist.camera.HAL3.enabled=1
+persist.camera.ois.disable=0
+ro.qualcomm.perf.cores_online=2
+ro.adb.secure=1
+#
+# BOOTIMAGE_BUILD_PROPERTIES
+#
+ro.bootimage.build.date=Mon Aug 17 16:12:18 UTC 2015
+ro.bootimage.build.date.utc=1439827938
+ro.bootimage.build.fingerprint=google/shamu/shamu:6.0/MPA44I/2172151:user/dev-keys
+persist.sys.usb.config=none
