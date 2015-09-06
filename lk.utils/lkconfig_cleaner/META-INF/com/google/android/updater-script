@@ -1,0 +1,5 @@
+show_progress(0.500000, 0);
+mount("ext4", "EMMC", "/dev/block/platform/msm_sdcc.1/by-name/userdata", "/data");
+delete_recursive("/data/data/leankernel");
+unmount("/data");
+show_progress(0.100000, 0);
