@@ -7,7 +7,7 @@ device="shamu"
 cc="/data/linaro/49/arm-cortex_a15-linux-gnueabihf-linaro/bin/arm-eabi-"
 filename="lk_${device}_lp-v${1}.zip"
 ocuc_branch="lk-lp-ocuc"
-mkbootimg="/data/mkbootimg_tools2/mkbootimg"
+mkbootimg="/data/mkbootimg_tools2/mkboot"
 
 compile() {
   cd $sdir
@@ -23,8 +23,8 @@ ramdisk() {
   chmod 700 sbin/lk-post-boot.sh
   chmod 755 res res/images res/images/charger
   chmod 640 fstab.shamu
-  find . | cpio -o -H newc | gzip > /tmp/ramdisk.img
-  $mkbootimg --kernel $objdir/arch/arm/boot/zImage-dtb  --ramdisk /tmp/ramdisk.img --cmdline "console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 androidboot.hardware=shamu msm_rtb.filter=0x37 ehci-hcd.park=3 utags.blkdev=/dev/block/platform/msm_sdcc.1/by-name/utags utags.backup=/dev/block/platform/msm_sdcc.1/by-name/utagsBackup coherent_pool=8M" --pagesize 2048 -o /tmp/boot.img
+  cd $dir
+  $mkbootimg $udir /tmp/boot.img
 }
 
 zipit() {
