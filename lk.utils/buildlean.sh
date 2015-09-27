@@ -5,7 +5,7 @@ udir="/lk2/shamu/lk.utils"
 objdir="/lk2/shamu_obj"
 device="shamu"
 cc="/data/linaro/49/arm-cortex_a15-linux-gnueabihf-linaro/bin/arm-eabi-"
-filename="lk_${device}_lp-v${1}.zip"
+filename="lk_${device}_m-v${1}.zip"
 ocuc_branch="lk-lp-ocuc"
 mkbootimg="/data/mkbootimg_tools2/mkboot"
 
