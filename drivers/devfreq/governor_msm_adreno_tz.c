@@ -51,6 +51,18 @@ static DEFINE_SPINLOCK(tz_lock);
 
 #define TAG "msm_adreno_tz: "
 
+/* Trap into the TrustZone, and call funcs there. */
+static int __secure_tz_entry2(u32 cmd, u32 val1, u32 val2)
+{
+       int ret;
+       spin_lock(&tz_lock);
+       /* sync memory before sending the commands to tz*/
+       __iowmb();
+       ret = scm_call_atomic2(SCM_SVC_IO, cmd, val1, val2);
+       spin_unlock(&tz_lock);
+       return ret;
+}
+
 /* Boolean to detect if pm has entered suspend mode */
 static bool suspended = false;
 
@@ -319,6 +331,7 @@ static int tz_suspend(struct devfreq *devfreq)
 	struct devfreq_dev_profile *profile = devfreq->profile;
 	unsigned long freq;
 
+	__secure_tz_entry2(TZ_RESET_ID, 0, 0);
 	suspended = true;
 
 	priv->bin.total_time = 0;
