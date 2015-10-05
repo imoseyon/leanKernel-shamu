@@ -1,0 +1,411 @@
+#!/system/bin/sh
+
+detectsu=`ls /data/data`
+[ -z "$detectsu" ] && echo "Must be superuser!" && exit
+
+minfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq`
+f1="/sys/devices/system/cpu/cpu"
+f2="/cpufreq/scaling_min_freq"
+f3="/cpufreq/scaling_max_freq"
+lkdata="/data/data/leankernel"
+
+while true; do
+mc=1
+
+echo
+echo "leanKernel configurator"
+echo "---"
+echo "0) display current settings"
+echo
+echo "1) cpu frequency control"
+echo "2) wake gesture control"
+echo "3) wakelock control"
+echo "4) charging led"
+echo "5) rgb/picture control (advanced)"
+echo "6) rgb/picture control (simple)"
+echo "7) vibe strength"
+echo "12) power profiles"
+echo
+echo "21) check top 10 wake locks (ie. wakeup sources)"
+echo
+echo -n "please enter a number (or press enter to exit): "
+
+read option
+
+case $option in
+0)
+	echo
+	echo "current settings"
+	echo "----------------"
+	smax=`cat /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq`
+	[ $smax -gt 2600000 ] && smax="Disabled"
+	cmffile="$lkdata/minfreq"
+	[ -f $cmffile ] && cminfreq=`cat $cmffile` \
+		|| cminfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq`
+	cmffile="$lkdata/maxfreq"
+	[ -f $cmffile ] && cmaxfreq=`cat $cmffile` \
+		|| cmaxfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq`
+	echo "1) cpu min freq: $cminfreq, max freq: $cmaxfreq, interactiveX screenoff max: $smax "
+	sdt=`cat /sys/bus/i2c/devices/1-004a/tsp`
+	hdt=`cat /sys/android_touch/doubletap2wake`
+	s2w=`cat /sys/android_touch/sweep2wake`
+	echo "2) wake gestures (OFF or 0 = disabled):"
+	echo "   stock dt2w: $sdt, haptic dt2w: $hdt, s2w: $s2w"
+	smb=`cat /sys/module/smb135x_charger/parameters/use_wlock`
+	si=`cat /sys/module/wakeup/parameters/enable_si_ws`
+	wr=`cat /sys/module/bcmdhd/parameters/wl_divide`
+	mh=`cat /sys/module/xhci_hcd/parameters/wl_divide`
+	echo "3) wakelock (Y/1 = enabled, N/0 = disabled, 2..X = divisor):"
+	echo "   smb135x: $smb, sensor_ind: $si, wlan_rx: $wr, msm_hsic: $mh"
+	echo -n "4) charging led: "
+	value=`cat /sys/class/leds/charging/trigger`
+ 	case "$value" in
+		*"[battery-charging]"*) echo "Enabled" ;;
+		*) echo "Disabled" ;;
+	esac
+	echo "5) rgb/picture control: "
+	rgb=`cat /sys/devices/platform/kcal_ctrl.0/kcal`
+	sat=`cat /sys/devices/platform/kcal_ctrl.0/kcal_sat`
+	cont=`cat /sys/devices/platform/kcal_ctrl.0/kcal_cont`
+	hue=`cat /sys/devices/platform/kcal_ctrl.0/kcal_hue`
+	gamma=`cat /sys/devices/platform/kcal_ctrl.0/kcal_val`
+	echo "   rgb: $rgb, sat: $sat, cont: $cont, hue: $hue, gamma: $gamma"
+	echo -n "7) vibe strength: "
+	cat /sys/vibrator/pwmvalue
+        if [ -f $lkdata/pprofile ]; then
+                echo -n "12) power profile: "
+                pp=`cat $lkdata/pprofile`
+                case $pp in
+                        0) echo "power saving";;
+                        1) echo "balanced";;
+                        2) echo "performance (default)";;
+                esac
+        fi
+	;;
+1)
+	echo -n "Enter 1 for min freq, 2 for max freq, 3 for interactiveX screen-off freq:"
+	read select
+	case $select in
+	  1) 
+		[ $minfreq -lt 300000 ] && echo -n "Enter 0 (223mhz/default), 1 (300mhz), 2 (422mhz), 3 (653mhz):" || \
+			echo -n "Enter 1 (300mhz/default), 2 (422mhz), 3 (653mhz):"
+		read value
+		case $value in
+		  0) FREQ=223200;;
+		  1) FREQ=300000;;
+		  2) FREQ=422400;;
+		  3) FREQ=652800;;
+		  *) mc=0;;
+		esac
+		if [ $mc -eq 1 ]; then
+		  echo $FREQ > $lkdata/minfreq
+		  echo $FREQ > ${f1}0${f2}
+		  for i in 1 2 3; do
+			[ -f $f1$i$f2 ] && echo $FREQ > $f1$i$f2
+		  done
+		fi
+		;;
+	  2) 
+		maxfreq=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies | awk '{ print $NF }'`
+		[ $maxfreq -gt 2649600 ] && echo -n "Enter 0 (2.9ghz/default), 1 (2.6ghz), 2 (2.5ghz), 3 (2.2ghz):" || \
+			echo -n "Enter 1 (2.6ghz/default), 2 (2.5ghz), 3 (2.2ghz):"
+		read value
+		case $value in
+		  0) FREQ=2880000;;
+		  1) FREQ=2649600;;
+		  2) FREQ=2496000;;
+		  3) FREQ=2265600;;
+		  *) mc=0;;
+		esac
+		if [ $mc -eq 1 ]; then
+		  echo $FREQ > $lkdata/maxfreq
+		  echo $FREQ > /sys/module/cpufreq/parameters/custom_max_freq
+		  for i in 0 1 2 3; do
+			[ -f $f1$i$f3 ] && echo $FREQ > $f1$i$f3
+		  done
+		fi
+		;;
+	  3)
+		echo -n "Enter a number between 0 and 5 (0:650mhz,1:883mhz,2:1.2ghz,3:1.5ghz,4:2.2ghz/default,5:disable/stock): "
+		read value
+		case $value in
+		  0) FREQ=652800;;
+		  1) FREQ=883200;;
+		  2) FREQ=1267200;;
+		  3) FREQ=1574400;;
+		  4) FREQ=2265600;;
+		  5) FREQ=2649600;;
+		  *) mc=0;;
+		esac
+		if [ $mc -eq 1 ]; then
+		  [ $value -eq 5 ] && rm -f $lkdata/screen_off_maxfreq \
+			|| echo $FREQ > $lkdata/screen_off_maxfreq
+		  echo $FREQ > /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq
+		  echo "Done! (also will persist at boot)"
+		fi
+		;;
+	   *) mc=0;;
+	esac
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
+	;;
+2)
+	echo -n "Enter 1 for stock dt2w, 2 for haptic dt2w, 3 for s2w, 4 for both, 0 to disable all (stock):"
+	read value
+	case $value in
+	  1)
+		echo 0 > /sys/android_touch/doubletap2wake
+		rm -f $lkdata/doubletap2wake
+		echo 0 > /sys/android_touch/sweep2wake
+		rm -f $lkdata/sweep2wake
+		echo AUTO > /sys/bus/i2c/devices/1-004a/tsp
+		echo AUTO > $lkdata/tsp
+		;;
+	  2)
+		echo OFF > /sys/bus/i2c/devices/1-004a/tsp
+		rm -f $lkdata/tsp
+		echo 0 > /sys/android_touch/sweep2wake
+		rm -f $lkdata/sweep2wake
+		echo 1 > /sys/android_touch/doubletap2wake
+		echo 1 > $lkdata/doubletap2wake
+		;;
+	  3)
+		echo OFF > /sys/bus/i2c/devices/1-004a/tsp
+		rm -f $lkdata/tsp
+		echo 0 > /sys/android_touch/doubletap2wake
+		rm -f $lkdata/doubletap2wake
+		echo 15 > /sys/android_touch/sweep2wake
+		echo 15 > $lkdata/sweep2wake
+		;;
+	  4)
+		echo OFF > /sys/bus/i2c/devices/1-004a/tsp
+		rm -f $lkdata/tsp
+		echo 1 > /sys/android_touch/doubletap2wake
+		echo 1 > $lkdata/doubletap2wake
+		echo 15 > /sys/android_touch/sweep2wake
+		echo 15 > $lkdata/sweep2wake
+		;;
+	  0)
+		echo OFF > /sys/bus/i2c/devices/1-004a/tsp
+		rm -f $lkdata/tsp
+		echo 0 > /sys/android_touch/sweep2wake
+		rm -f $lkdata/sweep2wake
+		echo 0 > /sys/android_touch/doubletap2wake
+		rm -f $lkdata/doubletap2wake
+		;;
+	  *) mc=0;;
+	esac
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
+	;;
+3)
+        echo -n "Wake sources: enter 1 for smb135x, 2 for sensor_ind, 3 for wlan_rx, and 4 for msm_hsic:"
+        read value
+	case $value in
+	  1)
+		echo -n "Enter 0 to disable, 1 to enable (stock) smb135x:"
+		read wval
+		case $wval in
+			0)
+			echo N > $lkdata/smb135x_use_wlock
+			echo N > /sys/module/smb135x_charger/parameters/use_wlock
+			;;
+			1)
+			rm -f $lkdata/smb135x_use_wlock
+			echo Y > /sys/module/smb135x_charger/parameters/use_wlock
+			;;
+			*) mc=0;;
+		esac
+		;;
+	  2)
+		echo -n "Enter 0 to disable, 1 to enable (stock) sensor_ind:"
+		read wval
+		case $wval in
+			0)
+			echo N > $lkdata/sensor_ind
+			echo N > /sys/module/wakeup/parameters/enable_si_ws
+			;;
+			1)
+			echo Y > $lkdata/sensor_ind
+			echo Y > /sys/module/wakeup/parameters/enable_si_ws
+			;;
+			*) mc=0;;
+		esac
+		;;
+	3)
+		echo -n "Enter 1 to 8 (1 = stock, higher = lower wake time) for wlan_rx:"
+		read wval
+		case $wval in
+			1)
+			rm -f $lkdata/wlan_rx
+			echo $wval > /sys/module/bcmdhd/parameters/wl_divide
+			;;
+			[2-8])
+			echo $wval > $lkdata/wlan_rx
+			echo $wval > /sys/module/bcmdhd/parameters/wl_divide
+			;;
+			*)
+			if [ $wval -gt 8 ]; then
+				echo $wval > $lkdata/wlan_rx
+				echo $wval > /sys/module/bcmdhd/parameters/wl_divide
+			else mc=0
+			fi
+			;;
+		esac
+		;;
+	4)
+		echo -n "Enter 0 to 8 (0 = disable, 1 = stock, higher = lower wake time) for msm_hsic:"
+		read wval
+		case $wval in
+			1)
+			rm -f $lkdata/msm_hsic
+			echo $wval > /sys/module/xhci_hcd/parameters/wl_divide
+			;;
+			0|[2-8])
+			echo $wval > $lkdata/msm_hsic
+			echo $wval > /sys/module/xhci_hcd/parameters/wl_divide
+			;;
+			*)
+			if [ $wval -gt 8 ]; then
+				echo $wval > $lkdata/msm_hsic
+				echo $wval > /sys/module/xhci_hcd/parameters/wl_divide
+			else mc=0
+			fi
+			;;
+		esac
+		;;
+	  *) mc=0;;
+	esac
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
+	;;
+4)
+        echo -n "Enter Y to enable, N to disable (stock) charging led: "
+        read value
+	case $value in
+	  Y|y)
+		echo battery-charging > $lkdata/charging_led
+		echo battery-charging > /sys/class/leds/charging/trigger
+		echo 1 > /sys/class/leds/charging/max_brightness
+		;;
+	  N|n)
+		rm -f $lkdata/charging_led
+		echo none > /sys/class/leds/charging/trigger
+		;;
+	  *) mc=0;;
+	esac
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
+	;;
+5)
+        echo -n "Enter three values (red, green, blue) between 0-255 (default 255 255 255, enter to skip):"
+	mc=0
+        read RGB
+	if [ -n "$RGB" ]; then
+		echo "$RGB" > $lkdata/kcal
+		echo "$RGB" > /sys/devices/platform/kcal_ctrl.0/kcal
+		mc=1
+	fi
+	echo -n "Enter between 224-383 for saturation (default 255, enter to skip):"
+        read SAT
+	if [ -n "$SAT" ]; then
+		echo "$SAT" > $lkdata/kcal_sat
+		echo "$SAT" > /sys/devices/platform/kcal_ctrl.0/kcal_sat
+		mc=1
+	fi
+	echo -n "Enter between 128-383 for contrast (default 255, enter to skip):"
+        read CONT
+	if [ -n "$CONT" ]; then
+		echo "$CONT" > $lkdata/kcal_cont
+		echo "$CONT" > /sys/devices/platform/kcal_ctrl.0/kcal_cont
+		mc=1
+	fi
+	echo -n "Enter between 0-1536 for hue (default 0, enter to skip):"
+        read HUE
+	if [ -n "$HUE" ]; then
+		echo "$HUE" > $lkdata/kcal_hue
+		echo "$HUE" > /sys/devices/platform/kcal_ctrl.0/kcal_hue
+		mc=1
+	fi
+	echo -n "Enter between 128-383 for gamma (default 255, enter to skip):"
+        read GAMMA
+	if [ -n "$GAMMA" ]; then
+		echo "$GAMMA" > $lkdata/kcal_val
+		echo "$GAMMA" > /sys/devices/platform/kcal_ctrl.0/kcal_val
+		mc=1
+	fi
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
+	;;
+6)
+        echo -n "Enter 1 for reference(6500k), 2 for cool(7500k), 3 for stock(6250k):"
+        read value
+	case $value in
+	  1) RGB="250 250 255";SAT=243;CONT=255;HUE=1515;GAMMA=250;;
+	  2) RGB="232 228 255";SAT=249;CONT=255;HUE=1515;GAMMA=253;;
+	  3) RGB="255 255 255";SAT=255;CONT=255;HUE=0;GAMMA=255;;
+	  *) mc=0;;
+	esac
+	if [ $mc -eq 1 ]; then
+	  if [ $value -eq 3 ]; then
+		rm -f $lkdata/kcal*
+	  else
+		echo "$RGB" > $lkdata/kcal
+		echo "$SAT" > $lkdata/kcal_sat
+		echo "$CONT" > $lkdata/kcal_cont
+		echo "$HUE" > $lkdata/kcal_hue
+		echo "$GAMMA" > $lkdata/kcal_val
+	  fi
+	  echo "$RGB" > /sys/devices/platform/kcal_ctrl.0/kcal
+	  echo "$SAT" > /sys/devices/platform/kcal_ctrl.0/kcal_sat
+	  echo "$CONT" > /sys/devices/platform/kcal_ctrl.0/kcal_cont
+	  echo "$HUE" > /sys/devices/platform/kcal_ctrl.0/kcal_hue
+	  echo "$GAMMA" > /sys/devices/platform/kcal_ctrl.0/kcal_val
+	  echo "Done! (also will persist at boot)"
+	fi
+	;;
+7) echo -n "Enter a number between 0 and 127 (stock) for vibe strength:"
+        read value
+	case $value in
+	  127)
+		rm -f $lkdata/pwmvalue
+		echo 127 > /sys/vibrator/pwmvalue
+		;;
+	  *)
+		if [ -n "$value" ] && [ $value -lt 127 ] && [ $value -ge 0 ]; then
+		  echo "$value" > $lkdata/pwmvalue
+		  echo "$value" > /sys/vibrator/pwmvalue
+		else mc=0
+		fi
+		;;
+	esac
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
+	;;
+12)
+	echo -n "Enter 2 for performance (default), 1 for balanced, and 0 for powersaving profile:"
+	read value
+	case $value in
+		0|1|2)
+			setprop fku.perf.profile $value
+			echo $value > $lkdata/pprofile
+			;;
+		*) mc=0;;
+	esac
+	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
+	;;
+21)
+	echo
+	if [ -a /system/xbin/awk ]; then
+		echo "1st column: total time wakeup source has been active."
+		echo "2nd column: max time the source was continuously active."
+		echo "(The numbers are duration in seconds)"
+		echo "-----"
+		cat /sys/kernel/debug/wakeup_sources | grep -v wakeup_count \
+		  | awk '{ printf "%-10s%-8s %s\n",int($7/1000),int($8/1000),$1 }' \
+		  | sort -rn | head -10
+	else
+		echo "busybox required!"
+	fi
+	;;
+*)
+	exit
+	;;
+esac
+[ $mc -eq 0 ] && echo && echo "No change made."
+echo
+done
