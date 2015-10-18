@@ -19,7 +19,8 @@ ro.adb.secure=1
 #
 # BOOTIMAGE_BUILD_PROPERTIES
 #
-ro.bootimage.build.date=Mon Aug 17 16:12:18 UTC 2015
-ro.bootimage.build.date.utc=1439827938
-ro.bootimage.build.fingerprint=google/shamu/shamu:6.0/MPA44I/2172151:user/dev-keys
+ro.bootimage.build.date=Wed Sep 16 01:30:30 UTC 2015
+ro.bootimage.build.date.utc=1442367030
+ro.bootimage.build.fingerprint=google/shamu/shamu:6.0/MRA58K/2256973:user/release-keys
 persist.sys.usb.config=none
+
