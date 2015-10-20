@@ -1,3 +1,14 @@
+service supolicy /system/xbin/supolicy --live \
+	"allow shell dalvikcache_data_file file write" \
+	"allow shell dalvikcache_data_file dir write" \
+	"allow mediaserver mediaserver_tmpfs file execute" \
+	"allow isolated_app app_data_file dir search"
+     disabled
+     oneshot
+
+on fs
+     start supolicy
+
 service lk-post-boot /sbin/lk-post-boot.sh
      class late_start
      user root
