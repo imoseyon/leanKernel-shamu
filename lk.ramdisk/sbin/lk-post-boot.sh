@@ -85,6 +85,11 @@ CFILE="/data/data/leankernel/msm_hsic"
 SFILE="/sys/module/xhci_hcd/parameters/wl_divide"
 [ -f $CFILE ] && echo `cat $CFILE` > $SFILE
 
+# bcl_hotplug_enable
+CFILE="/data/data/leankernel/bcl_hotplug_enable"
+SFILE="/sys/module/battery_current_limit/parameters/bcl_hotplug_enable"
+[ -f $CFILE ] && echo `cat $CFILE` > $SFILE
+
 # power profiles
 CFILE="/data/data/leankernel/pprofile"
 [ -f $CFILE ] && setprop fku.perf.profile `cat $CFILE`

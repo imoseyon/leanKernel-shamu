@@ -24,6 +24,7 @@ echo "4) charging led"
 echo "5) rgb/picture control (advanced)"
 echo "6) rgb/picture control (simple)"
 echo "7) vibe strength"
+echo "8) bcl control"
 echo "12) power profiles"
 echo
 echo "21) check top 10 wake locks (ie. wakeup sources)"
@@ -81,6 +82,8 @@ case $option in
                         2) echo "performance (default)";;
                 esac
         fi
+	echo -n "8) bcl cpu hotplug: "
+	cat /sys/module/battery_current_limit/parameters/bcl_hotplug_enable
 	;;
 1)
 	echo -n "Enter 1 for min freq, 2 for max freq, 3 for interactiveX screen-off freq:"
@@ -376,6 +379,22 @@ case $option in
 	esac
 	[ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
 	;;
+8)
+        echo -n "Enter Y to enable (stock), N to disable BCL CPU hotplug: "
+        read value
+        case $value in
+          Y|y)
+		echo Y > /sys/module/battery_current_limit/parameters/bcl_hotplug_enable
+                rm -f $lkdata/bcl_hotplug_enable
+                ;;
+          N|n)
+		echo N > /sys/module/battery_current_limit/parameters/bcl_hotplug_enable
+		echo N > $lkdata/bcl_hotplug_enable
+                ;;
+          *) mc=0;;
+        esac
+        [ $mc -eq 1 ] && echo && echo "Done! (also will persist at boot)"
+        ;;
 12)
 	echo -n "Enter 2 for performance (default), 1 for balanced, and 0 for powersaving profile:"
 	read value
