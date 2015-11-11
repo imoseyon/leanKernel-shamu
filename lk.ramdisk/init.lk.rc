@@ -1,9 +1,11 @@
 service supolicy /system/xbin/supolicy --live \
-	"allow shell dalvikcache_data_file file write" \
+	"allow shell dalvikcache_data_file file { write create }" \
 	"allow shell dalvikcache_data_file dir { add_name create relabelfrom relabelto remove_name rename reparent rmdir search setattr write }" \
 	"allow mediaserver mediaserver_tmpfs file execute" \
 	"allow isolated_app app_data_file dir search" \
-	"allow untrusted_app kernel dir search"
+	"allow untrusted_app kernel dir search" \
+	"allow untrusted_app sysfs_mmi_touch dir search" \
+	"allow untrusted_app kernel file { ioctl read write getattr append open }"
      disabled
      oneshot
 
