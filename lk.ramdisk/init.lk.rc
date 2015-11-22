@@ -5,12 +5,11 @@ service supolicy /system/xbin/supolicy --live \
 	"allow isolated_app app_data_file dir search" \
 	"allow untrusted_app kernel dir search" \
 	"allow untrusted_app sysfs_mmi_touch dir search" \
+        "allow init kernel security read_policy" \
+        "allow zygote init unix_stream_socket { read write }" \
 	"allow untrusted_app kernel file { ioctl read write getattr append open }"
      disabled
      oneshot
-
-on fs
-     start supolicy
 
 service lk-post-boot /sbin/lk-post-boot.sh
      class late_start
@@ -18,7 +17,8 @@ service lk-post-boot /sbin/lk-post-boot.sh
      disabled
      oneshot
 
-on property:sys.boot_completed=1
+on property:supolicy.loaded=1
+     start supolicy
      start lk-post-boot
 
 # profiles for compatibility with franco - basics only
