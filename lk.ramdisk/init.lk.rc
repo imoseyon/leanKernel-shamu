@@ -17,6 +17,13 @@ service lk-post-boot /sbin/lk-post-boot.sh
      disabled
      oneshot
 
+service healthd2 /sbin/healthd2
+    class core
+    critical
+    disabled
+    seclabel u:r:healthd:s0
+    group root system
+
 on property:supolicy.loaded=1
      start supolicy
      start lk-post-boot
@@ -62,3 +69,11 @@ on property:fku.perf.profile=2
     write /sys/class/devfreq/fdb00000.qcom,kgsl-3d0/max_freq 600000000
     write /sys/class/devfreq/fdb00000.qcom,kgsl-3d0/governor msm-adreno-tz
     write /sys/devices/system/cpu/sched_balance_policy/current_sched_balance_policy performance
+
+on property:ro.build.flavor=chroma_shamu-user
+    stop healthd
+    start healthd2
+
+on property:ro.build.flavor=nexus_shamu-userdebug
+    stop healthd
+    start healthd2
