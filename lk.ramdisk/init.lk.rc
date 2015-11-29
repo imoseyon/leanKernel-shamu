@@ -77,3 +77,23 @@ on property:ro.build.flavor=chroma_shamu-user
 on property:ro.build.flavor=nexus_shamu-userdebug
     stop healthd
     start healthd2
+
+on property:ro.build.flavor=nexus_shamu-user
+    stop healthd
+    start healthd2
+
+on property:ro.build.flavor=noobbuilds_n6-userdebug
+    stop healthd
+    start healthd2
+
+on property:ro.build.flavor=benzo_shamu-userdebug
+    stop healthd
+    start healthd2
+
+on property:ro.build.flavor=aosip_shamu-userdebug
+    stop healthd
+    start healthd2
+
+on property:ro.build.flavor=du_shamu-userdebug
+    stop healthd
+    start healthd2
