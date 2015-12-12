@@ -37,13 +37,13 @@ zipit() {
 } 
 
 cm_ramdisk() {
-  cd /tmp/cm/ramdisk
-  cp init sepolicy init.cm.rc init.environ.rc init.superuser.rc *_contexts $sdir/lk.ramdisk
+  cd /tmp/shamu.cm/ramdisk
+  cp -a * $sdir/lk.ramdisk
   cd $sdir
+  git checkout lk.ramdisk/init.rc lk.ramdisk/init.shamu.rc lk.ramdisk/fstab.shamu
 }
 
-[[ $1 =~ "cm" ]] && cm_ramdisk && sed -i '/SYSTEMSERVERCLASSPATH \/system\/framework\/services/d' lk.ramdisk/init.lk.rc
-[[ $1 =~ "ocuc" ]] && git checkout $ocuc_branch arch/arm/boot/dts/qcom/apq8084.dtsi drivers/thermal/lk_thermal.h
+[[ $1 =~ "cm" ]] && [[ `git status -s lk.ramdisk` ]] && echo "uncommitted changes in ramdisk!" && exit
+[[ $1 =~ "cm" ]] && cm_ramdisk
 compile $1 && ramdisk && zipit $filename
-[[ $1 =~ "ocuc" ]] && git checkout HEAD arch/arm/boot/dts/qcom/apq8084.dtsi drivers/thermal/lk_thermal.h
-[[ $1 =~ "cm" ]] && git checkout HEAD lk.ramdisk
+[[ $1 =~ "cm" ]] && git checkout HEAD lk.ramdisk && git clean -f lk.ramdisk
